@@ -18,7 +18,7 @@ const EchartPieChart = () => {
             {
             center: ['25%', '50%'],
             type: 'pie',
-            radius: ['40%', '70%'],
+            radius: ['40%', '80%'],
             avoidLabelOverlap: false,
             itemStyle: {
                 borderRadius: 5,

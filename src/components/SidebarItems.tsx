@@ -20,8 +20,8 @@ const SidebarItems: React.FC<Props> = ({icon, title, href}) => {
             className={clsx(
                 "flex gap-3 text-sm items-center rounded-lg p-1 ",
                 isActive
-                    ? "bg-[#3B82F6] font-medium text-white"
-                    : "hover:bg-[#F9FAFB] hover:text-black text-gray-400"
+                    ? "bg-white/20 font-medium text-white"
+                    : "hover:bg-white/40 hover:text-white text-white/80"
             )}>
             <span className="text-inherit">{icon}</span>
             <p>{title}</p>

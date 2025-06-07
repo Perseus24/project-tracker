@@ -35,10 +35,6 @@ export default function Dashboard() {
                 <KanbanBoardItem kanbanType='In-Progress' kanbanTotalItems={3} />
                 <KanbanBoardItem kanbanType='In-Review' kanbanTotalItems={0} />
                 <KanbanBoardItem kanbanType='Completed' kanbanTotalItems={1} />
-                {/* <div className='bg-slate-100 rounded-lg text-black'>Column 4</div>
-                <div className='bg-slate-100 rounded-lg text-black'>Column 4</div>
-                <div className='bg-slate-100 rounded-lg text-black'>Column 4</div>
-                <div className='bg-slate-100 rounded-lg text-black'>Column 4</div> */}
             </section>
         </div>
     );

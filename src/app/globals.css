@@ -28,3 +28,25 @@ body {
 .debug {
   border: 1px solid red;
 }
+
+
+.sidebar-scrollbar::-webkit-scrollbar{
+    width: 8px; 
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-track {
+    background: white; 
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #3B82F6;
+    border-radius: 6px; 
+    border: 3px solid transparent;
+    background-clip: padding-box;
+    transition: border 10s ease;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: #3B82F6; 
+    border: 0;
+}

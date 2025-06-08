@@ -7,7 +7,7 @@ const Sidebar = () => {
 
     return (
         <div className="w-1/5 min-h-screen bg-blue-900 flex flex-col text-white py-5 px-3">
-            <p className="text-xl pl-3 font-medium">ProjectTracker</p>
+            <p className="text-xl pl-3 font-medium">ProjectTrackr</p>
             <div className="mt-5 flex flex-col gap-2">
                 <p className="text-xs">NAVIGATION</p>
                 <SidebarItems 

@@ -45,13 +45,10 @@ const Sidebar = () => {
                     title = "Account"
                     href = "/account"
                 />
-                <SidebarItems 
-                    icon = {
-                        <LogOut className="text-inherit" size={24}/>
-                    }
-                    title = "Log Out"
-                    href = "/log-out"
-                />
+                <div className="flex gap-3 text-sm items-center rounded-lg p-1 hover:bg-white/40 hover:text-white text-white/80">
+                    <LogOut className="text-inherit" size={24}/>
+                    <p>Log Out</p>
+                </div>
             </div>
             <p className="text-xs text-white mt-auto">Developed by Cy Jay Herrera.</p>
         </div>

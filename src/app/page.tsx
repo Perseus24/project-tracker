@@ -1,13 +1,67 @@
 'use client';
 
 import Image from "next/image";
-
-// Signup
+import { motion } from 'framer-motion';
+import { useState } from "react";
+import cslx from 'clsx';
+import { registerUser, signInUser, supabase } from "@/lib/supabase";
 
 export default function Home() {
+    const [isSignUp, setIsSignUp] = useState(true);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [name, setName] = useState('');
+    // const [errorMessage, setErrorMessage] = useState('');
+
+    const registerUserRequest = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const { user} = await registerUser(email, password, name);
+        if (user) {
+            setIsSignUp(false);
+        }
+    }
+
+    const signInUserRequest = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const { user} = await signInUser(email, password);
+        if (user) {
+            console.log("successfully logged in");
+            console.log(user);
+            const session = await supabase.auth.getSession();
+            console.log("Current session:", session);
+            // Subscribe to auth state change for a better flow
+        supabase.auth.onAuthStateChange((event, session) => {
+            console.log("Auth state changed", event, session);
+
+            // If session is available, redirect to dashboard
+            if (session) {
+                window.location.href = '/dashboard'; // Redirect to dashboard
+            }
+        });
+            // window.location.href = '/dashboard';
+        } 
+    }
+    
     return (
         <div className="flex h-screen w-screen bg-white p-3">
-            <section className="w-1/2 flex flex-col px-28 pt-10 text-black 2xl:justify-center">
+            <motion.section 
+                initial={
+                    isSignUp ? 
+                    { opacity: 0, x: -50 } :
+                    { opacity: 0, x: 0 }
+                }
+                animate={
+                    isSignUp ?
+                    { opacity: 1, x: 0 } :
+                    { opacity: 1, x: '100%' }
+                }
+                transition={{ duration: 1 }}
+                className={
+                    cslx(
+                        "w-1/2 flex flex-col px-28 pt-10 text-black 2xl:justify-center",
+                        !isSignUp ? 'justify-center' : ''
+                    )
+                }>
                 <p className="text-2xl font-medium">Get Started Now</p>
                 <p className="text-gray-600 text-sm">Enter your credentials to access your account</p>
                 <div className="w-full flex my-5">
@@ -21,36 +75,86 @@ export default function Home() {
                     <p className="text-gray-400 text-sm">or</p>
                     <div className="w-full h-0.5 bg-gray-200"></div>
                 </div>
-                <form className="flex flex-col gap-3">
-                    <div className="flex flex-col gap-2">
-                        <label className="text-xs text-gray-600">Name</label>
-                        <input type="text" className="border border-gray-200 rounded-lg py-2 px-4 focus:outline-blue-900" />
-                    </div>
+                <form className="flex flex-col gap-3" onSubmit={
+                    isSignUp ? registerUserRequest : signInUserRequest}>
+                    {
+                        isSignUp &&
+                        <div className="flex flex-col gap-2">
+                            <label className="text-xs text-gray-600">Name</label>
+                            <input 
+                                type="text"
+                                value={name} 
+                                onChange={(e)=> setName(e.target.value)}
+                                className="border border-gray-200 rounded-lg py-2 px-4 focus:outline-blue-900 text-sm" />
+                        </div>
+                    }
                     <div className="flex flex-col gap-2">
                         <label className="text-xs text-gray-600">Email address</label>
-                        <input type="email" className="border border-gray-200 rounded-lg py-2 px-4 focus:outline-blue-900" />
+                        <input 
+                            type="email" 
+                            value={email}
+                            onChange={(e)=> setEmail(e.target.value)}
+                            className="border border-gray-200 rounded-lg py-2 px-4 focus:outline-blue-900 text-sm" />
                     </div>
                     <div className="flex flex-col gap-2">
                         <label className="text-xs text-gray-600">Password</label>
-                        <input type="password" className="border border-gray-200 rounded-lg py-2 px-4 focus:outline-blue-900" />
+                        <input 
+                            type="password" 
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="border border-gray-200 rounded-lg py-2 px-4 focus:outline-blue-900 text-sm" />
                     </div>
-                    <button disabled className="bg-blue-900 text-white text-sm py-3 rounded-xl cursor-pointer">Sign Up</button>
+                    <button className="bg-blue-900 text-white text-sm py-3 rounded-xl cursor-pointer">
+                        {
+                            isSignUp ? 'Sign Up' : 'Sign In'
+                        }
+                        </button>
                 </form>
+                
                 <div className="flex mt-7 text-sm">
-                    <p>Have an account?
-                        <span className="ml-2 text-blue-900 cursor-pointer font-semibold">Sign in</span>
+                    <p>
+                        {
+                            isSignUp ? 'Already have an account?' : 'Don\'t have an account?'
+                        }
+                        <span className="ml-2 text-blue-900 cursor-pointer font-semibold" onClick={() => setIsSignUp(!isSignUp)}>
+                            {
+                                isSignUp ? 'Sign in' : 'Sign up'
+                            }
+                        </span>
                     </p>
                 </div>
-            </section>
-            <section className="w-1/2 bg-blue-900 rounded-3xl overflow-hidden">
-                <div className="flex flex-col h-full pl-14 pt-10 pr-32">
+            </motion.section>
+            <motion.section 
+                initial={{ opacity: 0, x: 0 }}
+                animate={
+                    isSignUp ? 
+                    { opacity: 1, x: 0 } : 
+                    { opacity: 1, x: '-100%' }}
+                transition={{ duration: 1, ease: 'easeInOut' }}
+                className="w-1/2 bg-blue-900 rounded-3xl overflow-hidden">
+                <motion.div 
+                    initial={{ opacity: 0, x: -50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 1 }}
+                    className="flex flex-col h-full pl-14 pt-10 pr-32">
                     <p className="tracking-wide text-xl">The simplest way to manage your projects</p>
                     <p className="mt-2 text-xs">Enter your credentials to access your account</p>
-                    <Image src="/images/signup-bg.png" alt="signup-bg" width={400} height={400} className="mt-10 rounded-2xl" />
-                    <Image src="/images/signup-bg-2.png" alt="signup-bg-2" width={350} height={350} className="ml-66 -mt-32 rounded-2xl" />
-
-                </div>
-            </section>
+                    <motion.div
+                        initial={{ opacity: 0, x: -50 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 1 }}
+                    >
+                        <Image src="/images/signup-bg.png" alt="signup-bg" width={400} height={400} className="mt-10 rounded-2xl" />
+                    </motion.div>
+                    <motion.div
+                        initial={{ opacity: 0, x: -50 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 1, delay: 0.5 }}
+                    >
+                        <Image src="/images/signup-bg-2.png" alt="signup-bg-2" width={350} height={350} className="ml-66 -mt-32 rounded-2xl" />
+                    </motion.div>
+                </motion.div>
+            </motion.section>
         </div>
     )
 }

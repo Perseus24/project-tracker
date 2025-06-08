@@ -11,7 +11,7 @@ const EChartBarComponent = dynamic(() => import('@/components/Echarts/EchartBarC
     ssr: false
 });
 
-export default function Dashboard() {
+const Dashboard = () => {
     return (
         <div className='flex flex-col gap-7'>
             <section className="flex gap-5 h-[40vh]">
@@ -39,3 +39,5 @@ export default function Dashboard() {
         </div>
     );
 }
+
+export default Dashboard;

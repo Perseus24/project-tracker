@@ -1,3 +1,4 @@
+import ProjectNav from "@/components/ProjectNav";
 import Sidebar from "@/components/Sidebar";
 import Topbar from "@/components/Topbar";
 import { Metadata } from "next";
@@ -13,6 +14,7 @@ export default function ProjectsLayout({children}: {children: React.ReactNode}) 
             <Sidebar />
             <main className="flex flex-col flex-1 p-4 gap-4">
                 <Topbar title="Projects" />
+                <ProjectNav />
                 {children}
             </main>
         </div>

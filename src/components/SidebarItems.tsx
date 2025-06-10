@@ -12,13 +12,13 @@ interface Props {
 const SidebarItems: React.FC<Props> = ({icon, title, href}) => {
 
     const pathname = usePathname();
-    const isActive = pathname === href;
+    const isActive = pathname === href || pathname.startsWith(href + '/')
 
     return (
         <Link 
             href={href}
             className={clsx(
-                "flex gap-3 text-sm items-center rounded-lg p-1 ",
+                "flex gap-3 text-xs items-center rounded-lg p-1 ",
                 isActive
                     ? "bg-white/20 font-medium text-white"
                     : "hover:bg-white/40 hover:text-white text-white/80"

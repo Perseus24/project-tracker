@@ -1,30 +1,11 @@
 'use client';
 
-import { ChevronLeft, ChevronRight, DiamondPlus, Ellipsis, FolderClosed, FolderOpen, UserRoundPlus, Users } from "lucide-react";
+import { FolderOpen, UserRoundPlus, Users } from "lucide-react";
 import Image from "next/image";
 
 export default function Projects() {
     return (
         <div className="flex flex-col gap-4">
-            <div className="flex flex-col bg-white rounded-lg border border-gray-200">
-                <div className="flex gap-3 items-center text-gray-500 text-[14px] border-b py-3 px-4 border-b-gray-200">
-                    <div className="flex gap-2 items-center pr-2 border-r border-gray-200">
-                        <ChevronLeft size="20" color="black" />
-                        <ChevronRight size="20" color="gray" />
-                    </div>
-                    <FolderClosed size={18} />
-                    <p>Projects <span className="text-gray-400 text-[10px]"> /</span></p>
-                    <div className="flex gap-3 ml-auto items-center">
-                        <button className="cursor-pointer bg-[#3B82F6] text-xs text-white rounded-lg py-2 px-3 ml-auto flex items-center gap-2">
-                            <DiamondPlus size={16} />
-                            Start a new project</button>
-                        <Ellipsis size="20" color="gray" className="ml-auto" />
-                    </div>
-                </div>
-                <div className="flex text-sm py-3 px-4">
-                    <p className="text-gray-400">No projects yet</p>
-                </div>
-            </div>
             <div className="flex flex-col gap-4 bg-white rounded-2xl shadow-lg pt-5 pb-3">
                 <div className="flex justify-between items-center px-5">
                     <div className="flex gap-7 items-baseline">

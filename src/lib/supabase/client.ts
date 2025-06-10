@@ -69,3 +69,11 @@ export const signOutUser = async () => {
     }
     return { error: null };
 }
+
+export const getUsers = async () => {
+    const { data, error } = await supabase.from('users').select('*');
+    if (error) {
+        return { users: null, error: error.message };
+    }
+    return { users: data, error: null };
+}

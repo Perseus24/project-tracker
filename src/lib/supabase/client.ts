@@ -1,5 +1,6 @@
 
 import { createBrowserClient } from '@supabase/ssr';
+import { Users } from '../interface';
 
 const supabaseUrl = 'https://msvpnuyubljgawdzsfoq.supabase.co'!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -76,4 +77,80 @@ export const getUsers = async () => {
         return { users: null, error: error.message };
     }
     return { users: data, error: null };
+}
+
+// Function to write db data from creating a new project
+export const newProjectForm = async (title: string, startDate: string, endDate: string, projectDescription: string, client: string, projectType: string, projectPriority: string, projectMembers: Users[], tags: string[]
+) => {
+    const user = await getCurrentUser();
+    let userId = '';
+    if(user) userId = user.id;
+    
+    const { data: projectData, error: projectError } = await supabase
+        .from('projects')
+        .insert([{
+            project_title: title,
+            project_start_date: startDate,
+            project_end_date: endDate,
+            project_description: projectDescription,
+            client: client,
+            project_type: projectType,
+            project_priority: projectPriority,
+            created_by: userId
+        }])
+        .select();
+
+    if (projectError) {
+        return { error: projectError.message };
+    }
+
+    projectMembers.forEach(async (member) => {
+        const { error: memberError } = await supabase
+            .from('project_members')
+            .insert([{
+                project_id: projectData[0].id,
+                member_id: member.id
+            }]);
+        
+        if (memberError) {
+            return { error: memberError.message };
+        }
+    });
+
+    tags.forEach(async (tag) => {
+        const {error: tagError} = await supabase
+            .from('project_tags')
+            .insert([{
+                'project_id': projectData[0].id,
+                'tag_text': tag
+            }])
+
+        if (tagError) {
+            return {  error: tagError.message };
+        }
+    })
+    
+    return { error: null };
+}
+
+// Function tp get the user's projects
+export const getUserProjects = async () => {
+    const { data, error } = await supabase
+        .from('projects')
+        .select(`
+            *,
+            project_members(*),
+            project_tags(*),
+            users(*)
+        `)
+        .order('created_at', { ascending: false });
+
+    console.log("====================")
+    console.log(data);
+
+    if (error) {
+        return { projects: null, error: error.message };
+    }
+
+    return { projects: data, error: null };
 }

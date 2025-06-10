@@ -3,14 +3,24 @@
 import Dropdown from "@/components/Dropdown";
 import MultiInputField from "@/components/Forms/MultiInputField";
 import { Users } from "@/lib/interface";
+import { newProjectForm } from "@/lib/supabase/client";
 import {  Plus, Search, UserRoundPlus, X } from "lucide-react";
+import Link from "next/link";
+import  { useRouter } from "next/navigation";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 
 export default function CreateNewProject() {
+    const router = useRouter();
+    const [projectTitle, setProjectTitle] = useState('');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [projectDescription, setProjectDescription] = useState('');
+    const [client, setClient] = useState('');
+
     const [addMemberBtn, setAddMemberBtn] = useState(false);
     const [projectMembers, setProjectMembers] = useState<Users[]>([]);
-    const [projectType, setProjectType] = useState(-1);
-    const [priority, setPriority] = useState(-1);
+    const [projectType, setProjectType] = useState(0);
+    const [priority, setPriority] = useState(0);
     const [addTag, setAddTag] = useState(false);
     const [selectedTags, setSelectedTags] = useState<number[]>([]);
     const selectTagsCont = useRef(null);
@@ -31,14 +41,14 @@ export default function CreateNewProject() {
     ]);
     const [tags] = useState([
         { id: 0, item: "Urgent", category: "Project Status" },
-        { id: 1, item: "High Priority", category: "Project Status" },
-        { id: 2, item: "Medium Priority", category: "Project Status" },
+        { id: 1, item: "High Priority", category: "Project Status"},
+        { id: 2, item: "Medium Priority", category: "Project Status"},
         { id: 3, item: "Low Priority", category: "Project Status" },
         { id: 4, item: "On Hold", category: "Project Status" },
-        { id: 5, item: "Delayed", category: "Project Status" },
+        { id: 5, item: "Delayed", category: "Project Status"},
         { id: 6, item: "Completed", category: "Project Status" },
-        { id: 7, item: "In Progress", category: "Project Status" },
-        { id: 8, item: "Pending", category: "Project Status" },
+        { id: 7, item: "In Progress", category: "Project Status"},
+        { id: 8, item: "Pending", category: "Project Status"},
 
         { id: 9, item: "Q1", category: "Time / Date Related" },
         { id: 10, item: "Q2", category: "Time / Date Related" },
@@ -138,6 +148,26 @@ export default function CreateNewProject() {
         }
     };
 
+    const submitForm = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const projectTypeS = projectTypes.find((type) => type.id === projectType);
+        if(!projectTypeS) return;
+        const projectTypeString = projectTypeS.item;
+        const projectPriorityS = priorities.find((prio) => prio.id === priority);
+        if(!projectPriorityS) return;
+        const projectPriorityString = projectPriorityS.item; 
+        
+        let tagsString: string[] = [];
+        selectedTags.forEach((tag) => tagsString.push(tags.find((t) => t.id === tag)?.item || ''));
+        const { error } = await newProjectForm(projectTitle, startDate, endDate, projectDescription, client, projectTypeString, projectPriorityString, projectMembers, tagsString);
+
+        if (error) {
+            alert(error);
+        } else {
+            router.push(`/projects`);
+        }
+    }
+
     useEffect(() => {
         const handleClick= (e: MouseEvent) => {
             handleClickOutside(e, selectTagsCont, setAddTag);
@@ -151,29 +181,29 @@ export default function CreateNewProject() {
         };
     }, []);
     return (
-        <form className="bg-white rounded-lg border border-gray-200 p-4">
+        <form onSubmit={submitForm} className="bg-white rounded-lg border border-gray-200 pt-4 px-4">
             <p className="text-md font-medium text-black mb-4">Basic Information</p>
             {/* BASIC INFO */}
             <div className="flex gap-4">
                 <div className="flex flex-col gap-4 w-1/2">
                     <div className="flex flex-col gap-2">
                         <label className="text-gray-600 text-[13px]">Title of the Project</label>
-                        <input type="text" className="border border-gray-200 rounded-lg p-2 focus:outline-blue-900 text-black text-[13px]" />
+                        <input type="text" value={projectTitle} onChange={(e) => setProjectTitle(e.target.value)} className="border border-gray-200 rounded-lg p-2 focus:outline-blue-900 text-black text-[13px]" />
                     </div>
                     <div className="flex gap-2 w-full">
                         <div className="flex flex-1 flex-col gap-2">
                             <label className="text-gray-600 text-[13px]">Est. Start Date</label>
-                            <input type="date" className="border border-gray-200 rounded-lg p-2 focus:outline-blue-900 text-black text-[13px]" />
+                            <input type="date"  value={startDate} onChange={(e) => setStartDate(e.target.value)} className="border border-gray-200 rounded-lg p-2 focus:outline-blue-900 text-black text-[13px]" />
                         </div>
                         <div className="flex flex-1 flex-col gap-2">
                             <label className="text-gray-600 text-[13px]">Est. End Date</label>
-                            <input type="date" className="border border-gray-200 rounded-lg p-2 focus:outline-blue-900 text-black text-[13px]" />
+                            <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="border border-gray-200 rounded-lg p-2 focus:outline-blue-900 text-black text-[13px]" />
                         </div>
                     </div>
                 </div>
                 <div className="flex flex-col gap-2 w-1/2">
                     <label className="text-gray-600 text-[13px]">Description</label>
-                    <textarea  className="h-full border border-gray-200 rounded-lg p-2 focus:outline-blue-900 text-black text-[13px]" />
+                    <textarea value={projectDescription} onChange={(e) => setProjectDescription(e.target.value)}  className="h-full border border-gray-200 rounded-lg p-2 focus:outline-blue-900 text-black text-[13px]" />
                 </div>
             </div>
             {/* PEOPLE */}
@@ -182,7 +212,7 @@ export default function CreateNewProject() {
                 <div className="flex flex-col gap-4 w-1/2">
                     <div className="flex flex-col gap-2">
                         <label className="text-gray-600 text-[13px]">Client</label>
-                        <input type="text" className="border border-gray-200 rounded-lg p-2 focus:outline-blue-900 text-black text-[13px]" />
+                        <input type="text" value={client} onChange={(e) => setClient(e.target.value)} className="border border-gray-200 rounded-lg p-2 focus:outline-blue-900 text-black text-[13px]" />
                     </div>
                 </div>
                 <div className="flex flex-col gap-4 w-1/2">
@@ -201,7 +231,7 @@ export default function CreateNewProject() {
                             }
                             <button type="button" className="rounded-2xl text-white bg-[#3B82F6] cursor-pointer flex gap-2 px-3 py-2 w-max relative" onClick={() => setAddMemberBtn(!addMemberBtn)}>
                                 <UserRoundPlus size={16} />
-                                <p className="text-[11px] font-semibold">Add Member</p>
+                                <p className="text-[12px] font-medium">Add Member</p>
                                 {
                                     addMemberBtn && (
                                         <MultiInputField ref={addMemberCont} projectMembers={projectMembers} setProjectMembers={setProjectMembers} />
@@ -274,6 +304,10 @@ export default function CreateNewProject() {
                         </div>
                     ))
                 }
+            </div>
+            <div className="mt-4 border-t border-gray-200 -mx-4 p-4  justify-end flex text-sm">
+                <Link href="/projects" type="button" className="cursor-pointer bg-white text-gray-600 border border-gray-400 px-6 py-2 rounded-lg mr-4">Cancel</Link>
+                <button type="submit" className="cursor-pointer bg-blue-500 text-white px-6 py-2 rounded-lg">Submit</button>
             </div>
         </form>
     );

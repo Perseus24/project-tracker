@@ -1,13 +1,11 @@
 'use client';
-import { useRouter } from 'next/navigation';
 import Image from "next/image";
 import { motion } from 'framer-motion';
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import cslx from 'clsx';
 import { registerUser, signInUser, supabase } from "@/lib/supabase/client";
 
 export default function Home() {
-    const router = useRouter();
     const [isSignUp, setIsSignUp] = useState(true);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');

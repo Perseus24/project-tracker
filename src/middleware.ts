@@ -1,37 +1,57 @@
-// import { NextRequest, NextResponse } from "next/server"
-// import { getCurrentUser } from "./lib/supabase"
+import { NextResponse } from "next/server"
+import { createServerClient } from "@supabase/ssr";
 
-// export async function middleware(request: NextRequest){
-//     console.log("jello")
-//     const user = await getCurrentUser();
-//     console.log("user", user);
-//     if(!user){
-//         return NextResponse.redirect(
-//             new URL('/', request.url)
-//         );
-//     } 
+const protectedRoutes = ['/dashboard', '/projects'];
+/**
+ * 
+ * @param {import ("next/server").NextRequest} request
+ */
+export default async function middleware(request: import("next/server").NextRequest) {
 
-//     return NextResponse.redirect(
-//         new URL('/projects', request.url)
-//     );
-// }
+    let supabaseResponse = NextResponse.next({
+        request
+    })
 
-// export const config = {
-//     matcher: ['/dashboard', '/dashboard/:path*', '/projects', '/projects/:path*'],
-// }
+    const supabase =createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+            cookies: {
+                getAll() {
+                    return request.cookies.getAll();
+                },
+                setAll (cookiesToSet) {
+                    cookiesToSet.forEach(({ name, value, options}) => {
+                        request.cookies.set(name, value);
+                    })
+                    supabaseResponse = NextResponse.next({
+                        request
+                    })
+                    cookiesToSet.forEach(({ name, value, options}) => {
+                        supabaseResponse.cookies.set(name, value, options);
+                    })
+                    
+                }
+            }
+        }
+    )
 
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+    const pathname = request.nextUrl.pathname
 
-const isProtectedRoute = createRouteMatcher(["/dashboard", "/projects"]);
-export default clerkMiddleware( async (auth, req) => {
-    if(isProtectedRoute(req)) await auth.protect();
-});
+    const isProtectedRoute = protectedRoutes.some((route) =>
+        pathname === route || pathname.startsWith(route + '/')
+    );
+
+
+    const session = await supabase.auth.getUser()
+
+    if (isProtectedRoute && (!session.data.user || session.error)) {
+        return NextResponse.redirect(new URL('/', request.url))
+    }
+    return supabaseResponse
+
+}
 
 export const config = {
-    matcher: [
-        "/dashboard",
-        "/dashboard/:path*",
-        "/projects",
-        "/projects/:path*",
-    ],
-};
+    matcher: ['/((?!_next/static|_next/image|favicon.ico).*)']
+}

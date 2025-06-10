@@ -1,13 +1,14 @@
 
-import { createClient } from '@supabase/supabase-js'
-
+import { createBrowserClient } from '@supabase/ssr';
 
 const supabaseUrl = 'https://msvpnuyubljgawdzsfoq.supabase.co'!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
+export const createSupabaseClient = () => {
+    return createBrowserClient(supabaseUrl, supabaseKey);
+};
 
-// For client-side usage
-export const supabase = createClient(supabaseUrl, supabaseKey)
+export const supabase = createSupabaseClient()
 
 export const getCurrentUser = async () => {
     const { data: { user }, error } = await supabase.auth.getUser()

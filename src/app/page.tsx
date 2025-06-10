@@ -1,12 +1,13 @@
 'use client';
-
+import { useRouter } from 'next/navigation';
 import Image from "next/image";
 import { motion } from 'framer-motion';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import cslx from 'clsx';
-import { registerUser, signInUser, supabase } from "@/lib/supabase";
+import { registerUser, signInUser, supabase } from "@/lib/supabase/client";
 
 export default function Home() {
+    const router = useRouter();
     const [isSignUp, setIsSignUp] = useState(true);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -26,20 +27,15 @@ export default function Home() {
         const { user} = await signInUser(email, password);
         if (user) {
             console.log("successfully logged in");
-            console.log(user);
-            const session = await supabase.auth.getSession();
-            console.log("Current session:", session);
-            // Subscribe to auth state change for a better flow
-        supabase.auth.onAuthStateChange((event, session) => {
-            console.log("Auth state changed", event, session);
-
-            // If session is available, redirect to dashboard
-            if (session) {
-                window.location.href = '/dashboard'; // Redirect to dashboard
-            }
-        });
-            // window.location.href = '/dashboard';
-        } 
+            console.log("About to navigate to dashboard...");
+            
+            // Give a moment for session to be established
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            console.log("Executing router.push...");
+            window.location.href='/dashboard';
+            // router.push('/dashboard');
+        }
     }
     
     return (

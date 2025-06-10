@@ -2,9 +2,17 @@
 
 import SidebarItems from "./SidebarItems";
 import { CircleDot, CircleUserRound, LogOut, Settings } from "lucide-react";
+import { signOutUser } from "@/lib/supabase/client";
 
 const Sidebar = () => {
 
+    const handleLogout = async () => {
+        const error = await signOutUser();
+        if (error) {
+            console.error(error);
+        }
+        window.location.href = '/';
+    }
     return (
         <div className="w-1/5 min-h-screen bg-blue-900 flex flex-col text-white py-5 px-3">
             <p className="text-xl pl-3 font-medium">ProjectTrackr</p>
@@ -45,7 +53,7 @@ const Sidebar = () => {
                     title = "Account"
                     href = "/account"
                 />
-                <div className="flex gap-3 text-sm items-center rounded-lg p-1 hover:bg-white/40 hover:text-white text-white/80">
+                <div className="cursor-pointer flex gap-3 text-sm items-center rounded-lg p-1 hover:bg-white/40 hover:text-white text-white/80" onClick={handleLogout}>
                     <LogOut className="text-inherit" size={24}/>
                     <p>Log Out</p>
                 </div>

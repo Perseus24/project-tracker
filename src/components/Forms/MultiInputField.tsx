@@ -9,9 +9,10 @@ import { Loader } from "lucide-react";
 
 interface Props {
     projectMembers: Users[],
-    setProjectMembers: React.Dispatch<React.SetStateAction<Users[]>>
+    setProjectMembers: React.Dispatch<React.SetStateAction<Users[]>>,
+    ref: React.RefObject<HTMLDivElement | null>
 }
-const MultiInputField:React.FC<Props> = ({projectMembers, setProjectMembers}) => {
+const MultiInputField:React.FC<Props> = ({projectMembers, setProjectMembers, ref}) => {
     const [usersData, setUsersData] = useState<Users[]>([]);
 
     useEffect(() => {
@@ -32,7 +33,7 @@ const MultiInputField:React.FC<Props> = ({projectMembers, setProjectMembers}) =>
         setProjectMembers(prev => [...prev, user])
     }
     return (
-        <div className="absolute right-35 bottom-0 flex flex-col bg-white text-black py-2 border border-gray-200 rounded-lg text-[13px] w-max">
+        <div ref={ref} className="absolute right-35 bottom-0 flex flex-col bg-white text-black py-2 border border-gray-200 rounded-lg text-[13px] w-max">
             {
                 usersData.length > 0 ? (
                     usersData.map((user) => (

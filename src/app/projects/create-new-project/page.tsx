@@ -20,11 +20,16 @@ export default function CreateNewProject() {
     const [addMemberBtn, setAddMemberBtn] = useState(false);
     const [projectMembers, setProjectMembers] = useState<Users[]>([]);
     const [projectType, setProjectType] = useState(0);
+    const [projectTypeDropdown, setProjectTypeDropdown] = useState(false);
     const [priority, setPriority] = useState(0);
+    const [priorityDropdown, setPriorityDropdown] = useState(false);
+
     const [addTag, setAddTag] = useState(false);
     const [selectedTags, setSelectedTags] = useState<number[]>([]);
     const selectTagsCont = useRef(null);
     const addMemberCont = useRef(null);
+    const projectTypeDropdownRef = useRef(null);
+    const priorityDropdownRef = useRef(null);
     
     const [projectTypes] = useState([
         { id: 0, item: "Development" },
@@ -172,6 +177,8 @@ export default function CreateNewProject() {
         const handleClick= (e: MouseEvent) => {
             handleClickOutside(e, selectTagsCont, setAddTag);
             handleClickOutside(e, addMemberCont, setAddMemberBtn);
+            handleClickOutside(e, projectTypeDropdownRef, setProjectTypeDropdown);
+            handleClickOutside(e, priorityDropdownRef, setPriorityDropdown);
         };
 
         document.addEventListener('mousedown', handleClick);
@@ -248,13 +255,13 @@ export default function CreateNewProject() {
                 <div className="flex-1">
                     <div className="flex flex-col gap-2">
                         <label className="text-gray-600 text-[13px]">Project Type</label>
-                        <Dropdown items={projectTypes} setItem={setProjectType} selectedItem={projectType}  />
+                        <Dropdown ref={projectTypeDropdownRef} btnOpen={projectTypeDropdown} setBtnOpen={setProjectTypeDropdown} items={projectTypes} setItem={setProjectType} selectedItem={projectType}  />
                     </div>
                 </div>
                 <div className="flex-1">
                     <div className="flex flex-col gap-2">
                         <label className="text-gray-600 text-[13px]">Priority</label>
-                        <Dropdown items={priorities} setItem={setPriority} selectedItem={priority}  />
+                        <Dropdown ref={priorityDropdownRef} btnOpen={priorityDropdown} setBtnOpen={setPriorityDropdown} items={priorities} setItem={setPriority} selectedItem={priority}  />
                     </div>
                 </div>
                 <div className="flex-1"></div>

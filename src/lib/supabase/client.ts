@@ -109,7 +109,8 @@ export const newProjectForm = async (title: string, startDate: string, endDate: 
             .from('project_members')
             .insert([{
                 project_id: projectData[0].id,
-                member_id: member.id
+                member_id: member.id,
+                role: 'developer' // current default role
             }]);
         
         if (memberError) {
@@ -133,24 +134,55 @@ export const newProjectForm = async (title: string, startDate: string, endDate: 
     return { error: null };
 }
 
-// Function tp get the user's projects
+// Function to get the user's projects or the projects they are involved in
 export const getUserProjects = async () => {
+    const user = await getCurrentUser();
     const { data, error } = await supabase
-        .from('projects')
-        .select(`
-            *,
-            project_members(*),
-            project_tags(*),
-            users(*)
-        `)
+        .from('user_specific_projects')
+        .select('*')
+        .contains('member_ids', [user?.id])
         .order('created_at', { ascending: false });
-
-    console.log("====================")
-    console.log(data);
 
     if (error) {
         return { projects: null, error: error.message };
     }
 
     return { projects: data, error: null };
+}
+
+// function to search for users
+export const autocompleteUsersSearch = async (email: string) => {
+    const { data, error } = await supabase
+        .from('users')
+        .select('id, name, email')
+        .ilike('email', `%${email}%`)
+        .limit(5);
+    
+    if (error) {
+        return { users: null, error: error.message };
+    }
+    
+    return { users: data, error: null };
+}
+
+export const getProjectMembers = async (projectId: number) => {
+    const { data, error } = await supabase
+        .from('project_members')
+        .select(`
+            role,
+            users(id, name, email)
+        `)
+        .eq('project_id', projectId);
+    
+    if (error) {
+        return { members: null, error: error.message };
+    }
+
+    // Flatten the nested `users` object
+    const flattened = data?.map(member => ({
+        ...member.users,
+        role: member.role
+    })) || [];
+    
+    return { members: flattened, error: null };
 }

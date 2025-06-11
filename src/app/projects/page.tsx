@@ -1,13 +1,17 @@
 'use client';
 
-import { getUserProjects } from "@/lib/supabase/client";
-import { FolderOpen, UserRoundPlus, Users } from "lucide-react";
+import AddUser from "@/components/addUser";
+import Dropdown from "@/components/Dropdown";
+import { getProjectMembers, getUserProjects } from "@/lib/supabase/client";
+import { FolderOpen, UserRoundPlus, Users, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import {  useEffect, useState } from "react";
 
 export default function Projects() {
     const [projectList, setProjectList] = useState<any[]>([]);
+    const [addMemberBtn, setAddMemberBtn] = useState(false);
+    const [selectedMembers, setSelectedMembers] = useState<any[]>([]);
 
     useEffect(() => {
         const getProjects = async () => {
@@ -18,10 +22,23 @@ export default function Projects() {
                 setProjectList(projects ?? []);
             }
         }
-
         getProjects();
-        console.log("Projects: ", projectList);
     }, [])
+
+    const fetchProjectMembers = async (projectId: number) => {
+        const { members, error } = await getProjectMembers(projectId);
+        if (error) {
+            setSelectedMembers([]);
+        } else {
+            setSelectedMembers(members ?? []);
+        }
+    }
+    
+    const handleAssignProjectMembers = async (projectId: number) => {
+        setAddMemberBtn(!addMemberBtn);
+        fetchProjectMembers(projectId);
+    }
+
 
     return (
         <div className="flex flex-col gap-4">
@@ -53,10 +70,19 @@ export default function Projects() {
                                         ))
                                     }
                                 </div>
-                                <button className="rounded-2xl text-white bg-[#3B82F6] cursor-pointer flex gap-2 px-3 py-2">
+                                <div className="rounded-2xl text-white bg-[#3B82F6] cursor-pointer flex gap-2 px-3 py-2">
                                     <UserRoundPlus size={16} />
-                                    <p className="text-[11px] font-semibold">Add Member</p>
-                                </button>
+                                    <p className="text-[11px] font-semibold" onClick={() => handleAssignProjectMembers(project.id)}>Add Member</p>
+                                    {
+                                        addMemberBtn && (
+                                            <AddUser
+                                                selectedMembers={selectedMembers}
+                                                setSelectedMembers={setSelectedMembers}
+                                                setAddMemberBtn={setAddMemberBtn}
+                                            />
+                                        )
+                                    }
+                                </div>
                             </div>
                             <div className="flex items-center gap-2 border-t-2 border-t-gray-200 pt-3 text-xs text-gray-500 font-medium">
                                 <div className="flex gap-1">

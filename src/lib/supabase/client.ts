@@ -80,7 +80,7 @@ export const getUsers = async () => {
 }
 
 // Function to write db data from creating a new project
-export const newProjectForm = async (title: string, startDate: string, endDate: string, projectDescription: string, client: string, projectType: string, projectPriority: string, projectMembers: Users[], tags: string[]
+export const newProjectForm = async (title: string, startDate: string, endDate: string, projectDescription: string, client: string, projectType: string, projectPriority: string, projectMembers: any[], tags: string[]
 ) => {
     const user = await getCurrentUser();
     let userId = '';
@@ -110,7 +110,7 @@ export const newProjectForm = async (title: string, startDate: string, endDate: 
             .insert([{
                 project_id: projectData[0].id,
                 member_id: member.id,
-                role: 'developer' // current default role
+                role: member.role 
             }]);
         
         if (memberError) {
@@ -169,7 +169,7 @@ export const getProjectMembers = async (projectId: number) => {
     const { data, error } = await supabase
         .from('project_members')
         .select(`
-            role,
+            id, role,
             users(id, name, email)
         `)
         .eq('project_id', projectId);
@@ -181,8 +181,31 @@ export const getProjectMembers = async (projectId: number) => {
     // Flatten the nested `users` object
     const flattened = data?.map(member => ({
         ...member.users,
-        role: member.role
+        role: member.role,
+        table_id: member.id
     })) || [];
     
     return { members: flattened, error: null };
+}
+
+export const modifyProjectMembers = async (selectedMembers: any[], projectId: number) => {
+    const { error } = await supabase
+        .from('project_members')
+        .upsert(
+            selectedMembers.map(member => ({
+                project_id: projectId,
+                member_id: member.id,
+                role: member.role,
+                id: member.table_id
+            })),
+        {
+            onConflict: 'id',
+        }
+        );
+    
+    if (error) {
+        return { error: error.message };
+    }
+    
+    return { error: null };
 }

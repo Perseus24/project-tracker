@@ -1,5 +1,6 @@
 'use client';
 
+import AddUser from "@/components/addUser";
 import Dropdown from "@/components/Dropdown";
 import MultiInputField from "@/components/Forms/MultiInputField";
 import { Users } from "@/lib/interface";
@@ -155,6 +156,7 @@ export default function CreateNewProject() {
 
     const submitForm = async (e: React.FormEvent) => {
         e.preventDefault();
+
         const projectTypeS = projectTypes.find((type) => type.id === projectType);
         if(!projectTypeS) return;
         const projectTypeString = projectTypeS.item;
@@ -236,15 +238,16 @@ export default function CreateNewProject() {
                                     </p>
                                 ))
                             }
-                            <button type="button" className="rounded-2xl text-white bg-[#3B82F6] cursor-pointer flex gap-2 px-3 py-2 w-max relative" onClick={() => setAddMemberBtn(!addMemberBtn)}>
+                            <div className="rounded-2xl text-white bg-[#3B82F6] cursor-pointer flex gap-2 px-3 py-2 w-max" onClick={() => setAddMemberBtn(!addMemberBtn)}>
                                 <UserRoundPlus size={16} />
                                 <p className="text-[12px] font-medium">Add Member</p>
                                 {
                                     addMemberBtn && (
-                                        <MultiInputField ref={addMemberCont} projectMembers={projectMembers} setProjectMembers={setProjectMembers} />
+                                        <AddUser setAddMemberBtn={setAddMemberBtn} selectedMembers={projectMembers} setSelectedMembers={setProjectMembers} />
+                                        // <MultiInputField ref={addMemberCont} projectMembers={projectMembers} setProjectMembers={setProjectMembers} />
                                     )
                                 }
-                            </button>
+                            </div>
                         </div>
                     </div>
                 </div>

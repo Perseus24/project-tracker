@@ -1,17 +1,21 @@
 'use client';
 
 import AddUser from "@/components/addUser";
-import Dropdown from "@/components/Dropdown";
 import { getProjectMembers, getUserProjects } from "@/lib/supabase/client";
 import { FolderOpen, UserRoundPlus, Users, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import {  useEffect, useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function Projects() {
+    
     const [projectList, setProjectList] = useState<any[]>([]);
     const [addMemberBtn, setAddMemberBtn] = useState(false);
     const [selectedMembers, setSelectedMembers] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const [editingProjectId, setEditingProjectId] = useState<number | null>(null); 
 
     useEffect(() => {
         const getProjects = async () => {
@@ -20,6 +24,7 @@ export default function Projects() {
                 setProjectList([]);
             } else {
                 setProjectList(projects ?? []);
+                setLoading(false);
             }
         }
         getProjects();
@@ -35,17 +40,52 @@ export default function Projects() {
     }
     
     const handleAssignProjectMembers = async (projectId: number) => {
-        setAddMemberBtn(!addMemberBtn);
-        fetchProjectMembers(projectId);
+        // setAddMemberBtn(!addMemberBtn);
+        // fetchProjectMembers(projectId);
+        if (editingProjectId === projectId) {
+            // Close if clicking on the same project
+            setEditingProjectId(null);
+            setSelectedMembers([]);
+        } else {
+            // Open for new project
+            setEditingProjectId(projectId);
+            await fetchProjectMembers(projectId);
+        }
     }
 
+    const closeAddMember = () => {
+        setEditingProjectId(null);
+        setSelectedMembers([]);
+    }
 
+    if (loading) {
+        return (
+            <div className="flex flex-col gap-4">
+                <div className="flex justify-between items-center">
+                    <Skeleton className="h-[20px] w-2/5 rounded-xl bg-gray-200" />
+                    <Skeleton className="h-[20px] w-1/5 rounded-xl bg-gray-200" />
+                </div>
+                <div className="flex gap-5">
+                    <Skeleton className="h-[20px] w-1/5 rounded-xl bg-gray-200" />
+                    <Skeleton className="h-5 w-5 rounded-full bg-gray-200" />
+                    <Skeleton className="h-5 w-5 rounded-full bg-gray-200" />
+                </div>
+                <div className="flex justify-between items-center">
+                    <Skeleton className="h-[20px] w-3/5 rounded-xl bg-gray-200" />
+                    <Skeleton className="h-[20px] w-1/10 rounded-xl bg-gray-200" />
+                </div>
+            </div>
+        )
+    }
+
+    console.log("Parent component re-rendering");
+    console.log("Project List: ", projectList);
     return (
         <div className="flex flex-col gap-4">
             {
                 projectList && (
                     projectList.map((project, index) => (
-                        <div key={index} className="flex flex-col gap-4 bg-white rounded-2xl shadow-lg pt-5 pb-3">
+                        <div key={project.id} className="flex flex-col gap-4 bg-white rounded-2xl shadow-lg pt-5 pb-3">
                             <div className="flex justify-between items-center px-5">
                                 <div className="flex gap-7 items-baseline">
                                     <p className="font-semibold text-gray-600">{project.project_title}</p>
@@ -63,8 +103,8 @@ export default function Projects() {
                                 </div>
                                 <div className="flex items-center">
                                     {
-                                        project.project_members && project.project_members.map(( index: number) => (
-                                            <div key={index} className="w-7 h-7 rounded-full overflow-hidden border-2 border-white -ml-2">
+                                        project.project_members && project.project_members.map((member: any) => (
+                                            <div key={member.id} className="w-7 h-7 rounded-full overflow-hidden border-2 border-white -ml-2">
                                                 <Image src="/images/profile-picture-1.jpg" alt="profile1" width={28} height={28} />
                                             </div>
                                         ))
@@ -74,11 +114,12 @@ export default function Projects() {
                                     <UserRoundPlus size={16} />
                                     <p className="text-[11px] font-semibold" onClick={() => handleAssignProjectMembers(project.id)}>Add Member</p>
                                     {
-                                        addMemberBtn && (
+                                        editingProjectId === project.id && (
                                             <AddUser
                                                 selectedMembers={selectedMembers}
                                                 setSelectedMembers={setSelectedMembers}
-                                                setAddMemberBtn={setAddMemberBtn}
+                                                setAddMemberBtn={closeAddMember}
+                                                projectId={project.id}
                                             />
                                         )
                                     }

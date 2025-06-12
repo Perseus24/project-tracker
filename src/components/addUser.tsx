@@ -2,22 +2,24 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import Dropdown from "./Dropdown";
-import { SetStateAction, useEffect, useRef, useState } from "react";
-import clsx from "clsx";
-import { autocompleteUsersSearch, getProjectMembers } from "@/lib/supabase/client";
+import { SetStateAction, useEffect, useMemo, useRef, useState } from "react";
+import { autocompleteUsersSearch, modifyProjectMembers} from "@/lib/supabase/client";
 import React from "react";
+import clsx from "clsx";
 
 interface Props {
     setAddMemberBtn: React.Dispatch<React.SetStateAction<boolean>>,
     selectedMembers: any[],
-    setSelectedMembers: React.Dispatch<React.SetStateAction<any[]>>
+    setSelectedMembers: React.Dispatch<React.SetStateAction<any[]>>,
+    projectId?: number
 }
-const AddUser:React.FC<Props> = ({setAddMemberBtn, selectedMembers, setSelectedMembers}) => {
-    const [roles] = useState([
+const AddUser:React.FC<Props> = ({setAddMemberBtn, selectedMembers, setSelectedMembers, projectId}) => {
+    console.log("Add user projectId ", projectId);
+    const roles = useMemo(() => [
         { id: 0, item: "Developer" },
-        { id: 1, item:  "Project Manager" },
+        { id: 1, item: "Project Manager" },
         { id: 2, item: "Viewer" },
-    ]);
+    ], []);
     // const [selectedMembers, setSelectedMembers] = useState<any[]>([]);
     const [searchUser, setSearchUser] = useState('');
     const [searchUserList, setSearchUserList] = useState<any[]>([]);
@@ -39,17 +41,6 @@ const AddUser:React.FC<Props> = ({setAddMemberBtn, selectedMembers, setSelectedM
             )
         );
     };
-
-    const assignMembersForm = async (e: React.FormEvent) => {
-        e.preventDefault();
-        console.log("===================")
-        console.log(selectedMembers);
-        // const { error } = await assignMembers(selectedMembers, selectedRoles);
-        // if (error) {
-        //     return { error: error.message };
-        // }
-        // return { error: null };
-    }
     
     useEffect(() => {
         // Initialize refs for each selected member
@@ -106,15 +97,22 @@ const AddUser:React.FC<Props> = ({setAddMemberBtn, selectedMembers, setSelectedM
         return () => clearTimeout(timeout);
     }, [searchUser]);
 
-    console.log("*****************")
-    console.log(selectedMembers)
-
-
+    const handleAssignMembers = async () => {
+        // Function to add members from the projects page
+        if(projectId){
+            const {error} =await modifyProjectMembers(selectedMembers, projectId);
+            if(!error){
+                setAddMemberBtn(false);
+            }
+        }else {
+            setAddMemberBtn(false);
+        }
+    }
 
     return (
-        <div className="absolute top-0 right-0 h-full w-full ">
-            <div className="absolute inset-0 bg-gray-400 opacity-50 z-0" />
-            <form onSubmit={assignMembersForm} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2/5 max-h-3/4 min-h-min bg-white rounded-xl pt-6">
+        <div className="fixed top-0 right-0 w-full h-screen z-50" onClick={(e) => e.stopPropagation()}>
+            <div className="absolute inset-0 bg-gray-400/50 z-0" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2/5 max-h-3/4 min-h-min bg-white rounded-xl pt-6 z-50">
                 <div className="flex justify-between items-center text-gray-800 border-b border-gray-200 pb-4 px-7 ">
                     <p className="text-md font-semibold">Add members</p>
                     <X onClick={()=> setAddMemberBtn(false)} />
@@ -179,12 +177,12 @@ const AddUser:React.FC<Props> = ({setAddMemberBtn, selectedMembers, setSelectedM
                     )
                 }
                 <div className="flex justify-end p-3 border-t border-gray-200">
-                    <button disabled={selectedMembers.length === 0} className={clsx(
+                    <button type="button" disabled={selectedMembers.length === 0} className={clsx(
                         selectedMembers.length === 0 ? 'bg-[#3B82F6]/20 cursor-not-allowed' : 'cursor-pointer',
                         "bg-[#3B82F6] text-white rounded-lg px-4 py-2 text-[13px]"
-                    )}>Confirm</button>
+                    )} onClick={() => handleAssignMembers()}>Confirm</button>
                 </div>
-            </form>
+            </div>
         </div>
     )
 }

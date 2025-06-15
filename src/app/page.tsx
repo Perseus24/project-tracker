@@ -3,7 +3,7 @@ import Image from "next/image";
 import { motion } from 'framer-motion';
 import { useState } from "react";
 import cslx from 'clsx';
-import { registerUser, signInUser, supabase } from "@/lib/supabase/client";
+import { registerUser, signInUser } from "@/lib/supabase/client";
 
 export default function Home() {
     const [isSignUp, setIsSignUp] = useState(true);
@@ -24,13 +24,8 @@ export default function Home() {
         e.preventDefault();
         const { user} = await signInUser(email, password);
         if (user) {
-            console.log("successfully logged in");
-            console.log("About to navigate to dashboard...");
-            
             // Give a moment for session to be established
             await new Promise(resolve => setTimeout(resolve, 500));
-            
-            console.log("Executing router.push...");
             window.location.href='/dashboard';
             // router.push('/dashboard');
         }
@@ -125,7 +120,7 @@ export default function Home() {
                     { opacity: 1, x: 0 } : 
                     { opacity: 1, x: '-100%' }}
                 transition={{ duration: 1, ease: 'easeInOut' }}
-                className="w-1/2 bg-blue-900 rounded-3xl overflow-hidden">
+                className="w-1/2 bg-blue-900 rounded-3xl overflow-hidden text-white">
                 <motion.div 
                     initial={{ opacity: 0, x: -50 }}
                     animate={{ opacity: 1, x: 0 }}

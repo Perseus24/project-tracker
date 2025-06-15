@@ -168,7 +168,11 @@ const AddUser:React.FC<Props> = ({setAddMemberBtn, selectedMembers, setSelectedM
                                                 items={roles} 
                                                 setItem={(roleId) => updateUserRole(user.id, roleId)} 
                                                 selectedItem={user.role}  />
-                                            <X className="cursor-pointer" onClick={() => setSelectedMembers(selectedMembers.filter((member) => member.id !== user.id))} size={17} />
+                                            {
+                                                !user.table_id && (
+                                                    <X className="cursor-pointer" onClick={() => setSelectedMembers(selectedMembers.filter((member) => member.id !== user.id))} size={17} />
+                                                )
+                                            }
                                         </div>
                                     </div>
                                 ))

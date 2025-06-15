@@ -11,7 +11,6 @@ import { Skeleton } from "@/components/ui/skeleton"
 export default function Projects() {
     
     const [projectList, setProjectList] = useState<any[]>([]);
-    const [addMemberBtn, setAddMemberBtn] = useState(false);
     const [selectedMembers, setSelectedMembers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -78,13 +77,11 @@ export default function Projects() {
         )
     }
 
-    console.log("Parent component re-rendering");
-    console.log("Project List: ", projectList);
     return (
         <div className="flex flex-col gap-4">
             {
                 projectList && (
-                    projectList.map((project, index) => (
+                    projectList.map((project) => (
                         <div key={project.id} className="flex flex-col gap-4 bg-white rounded-2xl shadow-lg pt-5 pb-3">
                             <div className="flex justify-between items-center px-5">
                                 <div className="flex gap-7 items-baseline">

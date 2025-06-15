@@ -188,6 +188,7 @@ export const getProjectMembers = async (projectId: number) => {
     return { members: flattened, error: null };
 }
 
+// update/ insert project members from the projects page
 export const modifyProjectMembers = async (selectedMembers: any[], projectId: number) => {
     const { error } = await supabase
         .from('project_members')
@@ -196,10 +197,9 @@ export const modifyProjectMembers = async (selectedMembers: any[], projectId: nu
                 project_id: projectId,
                 member_id: member.id,
                 role: member.role,
-                id: member.table_id
             })),
         {
-            onConflict: 'id',
+            onConflict: 'project_id,member_id',
         }
         );
     
@@ -208,4 +208,35 @@ export const modifyProjectMembers = async (selectedMembers: any[], projectId: nu
     }
     
     return { error: null };
+}
+
+export const fetchSpecificProject = async (projectId: number, titleOnly: boolean ) => {
+
+    if (titleOnly) {
+        const { data } = await supabase
+            .from('projects')
+            .select('project_title')
+            .eq('id', projectId)
+            .single(); 
+        if (!data) {
+            return null;
+        }
+        return data;
+    }
+
+    const { data } = await supabase
+        .from('projects')
+        .select(`
+            *,
+            created_by_user:created_by(name, email),
+            project_tags(tag_text),
+            project_members(users(name,email))`
+        )
+        .eq('id', projectId)
+        .single(); 
+
+    if (!data) {
+        return null;
+    }
+    return data;
 }

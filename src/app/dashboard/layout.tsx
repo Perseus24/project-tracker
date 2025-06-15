@@ -1,5 +1,6 @@
 import Sidebar from "@/components/Sidebar";
 import Topbar from "@/components/Topbar";
+import ProgressBar from "@/components/ui/ProgressBar";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -11,6 +12,7 @@ export default function DashboardLayout({children}: {children: React.ReactNode})
     
     return (
         <div className="flex w-[100%] bg-[#F9FAFB] scrollbar">
+            <ProgressBar />
             <Sidebar />
             <main className="flex flex-col flex-1 p-4 gap-4">
                 <Topbar title="Dashboard" />

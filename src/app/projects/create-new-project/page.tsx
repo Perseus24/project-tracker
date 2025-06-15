@@ -2,7 +2,6 @@
 
 import AddUser from "@/components/addUser";
 import Dropdown from "@/components/Dropdown";
-import MultiInputField from "@/components/Forms/MultiInputField";
 import { Users } from "@/lib/interface";
 import { newProjectForm } from "@/lib/supabase/client";
 import {  Plus, Search, UserRoundPlus, X } from "lucide-react";
@@ -244,7 +243,6 @@ export default function CreateNewProject() {
                                 {
                                     addMemberBtn && (
                                         <AddUser setAddMemberBtn={setAddMemberBtn} selectedMembers={projectMembers} setSelectedMembers={setProjectMembers} />
-                                        // <MultiInputField ref={addMemberCont} projectMembers={projectMembers} setProjectMembers={setProjectMembers} />
                                     )
                                 }
                             </div>

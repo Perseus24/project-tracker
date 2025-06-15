@@ -240,3 +240,15 @@ export const fetchSpecificProject = async (projectId: number, titleOnly: boolean
     }
     return data;
 }
+
+export const getUser = async () => {
+    const { data: { user }, error } = await supabase.auth.getUser()
+    if (error) return null
+    const { data: userData, error: userDataError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', user?.id)
+        .single();
+    if (userDataError) return null
+    return userData
+}

@@ -12,7 +12,6 @@ export default function ProjectDetails () {
     const params = useParams();
     const projectId = Number(params.id);
     const [projectDetails, setProjectDetails] = useState<Project | null>(null);
-
     useEffect(() => {
         const fetchProjectDetails = async () => {
             const data = await fetchSpecificProject(projectId, false);
@@ -31,7 +30,6 @@ export default function ProjectDetails () {
         });
         return formattedDate;
     }
-    console.log(projectDetails);
     if (!projectDetails) return null;
 
     return (

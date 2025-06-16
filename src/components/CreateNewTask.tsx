@@ -23,7 +23,7 @@ import {
     arrayMove,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { Users } from "@/lib/interface";
 import { getUser } from "@/lib/supabase/client";
 import {
@@ -41,6 +41,7 @@ import {
 import { Button } from "./ui/button";
 import { Calendar } from "./ui/calendar";
 import React from "react";
+import AssignUserToTask from "./AssignUserToTask";
 
 function isInteractiveElement(element: EventTarget | null) {
     if (!(element instanceof HTMLElement)) return false;
@@ -140,11 +141,8 @@ const CreateNewTask:React.FC<Props> = ({setCreateTaskButton}) => {
     ]);
     const [deadlineButton, setDeadlineButton] = useState(false);
     const [date, setDate] = React.useState<Date | undefined>(undefined)
+    const [assignedMembers, setAssignedMembers] = useState<any[]>([]);
 
-    const priorityDropdownButtonRef = useRef(null);
-    const addTagButtonRef = useRef(null);
-
-    const [addTagButton, setAddTagButton] = useState(false);
     const [taskTags, setTaskTags] = useState<number[]>([]);
     const [tags] = useState([
         // CATEGORY: Roles / Areas
@@ -206,28 +204,15 @@ const CreateNewTask:React.FC<Props> = ({setCreateTaskButton}) => {
         const newIndex = subtasks.indexOf(String(over.id));
         setSubtasks(arrayMove(subtasks, oldIndex, newIndex));
     };
+
     useEffect(() => {
         const fetchUser = async () => {
             const user = await getUser();
             if (!user) return;
             setUser(user);
         };
-
-        const handleClick= (e: MouseEvent) => {
-            handleClickOutside(e, addTagButtonRef, setAddTagButton);
-        };
-
-        document.addEventListener('mousedown', handleClick);
         fetchUser();
-        return () => {
-            document.removeEventListener('mousedown', handleClick);
-        };
-        
     }, [])
-
-    useEffect(() => {
-        console.log("subtasks updated:", subtasks);
-        }, [subtasks]);
 
     const addSelectedTags = (e: React.MouseEvent | ChangeEvent, id: number) => {
         if (e && (e as React.MouseEvent).stopPropagation) {
@@ -242,12 +227,6 @@ const CreateNewTask:React.FC<Props> = ({setCreateTaskButton}) => {
         });
     }
 
-    const handleClickOutside = (e: MouseEvent, ref: React.RefObject<HTMLDivElement | null>, setter: React.Dispatch<React.SetStateAction<boolean>>) => {
-        if (ref.current && !ref.current.contains(e.target as Node)) {
-            setter(false);
-        }
-    };
-
     const handleAddSubtask = () => {
         setSubtasks(prev => [...prev, newSubtaskInput]);
         setAddNewSubtask(false);
@@ -257,28 +236,25 @@ const CreateNewTask:React.FC<Props> = ({setCreateTaskButton}) => {
     return (
         <div className="fixed top-0 right-0 w-full h-screen z-50" onClick={(e) => e.stopPropagation()}>
             <div className="absolute inset-0 bg-gray-400/50 z-0" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/5 max-h-[90vh] bg-white rounded-xl pt-6 z-50 text-gray-700 overflow-hidden">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/5 max-h-[90vh] min-h-[85vh] bg-white rounded-xl pt-6 z-50 text-gray-700 overflow-hidden">
                     <div className="flex justify-between items-center text-gray-800 border-b border-gray-200 pb-4 px-7 ">
                         <p className="text-base font-semibold">Create new task</p>
                         <X className="cursor-pointer" onClick={()=> setCreateTaskButton(false)} />
                     </div>
-                    <div className="flex">
-                        <section className="flex flex-col w-2/3 px-8 py-5 overflow-y-auto max-h-[80vh] sidebar-scrollbar">
-                            <div className="flex gap-5 w-full">
-                                <div className="h-5 w-5 border-2 border-gray-300 rounded-full"></div>
-                                <div className="flex flex-col gap-2 border border-gray-300 rounded-lg p-3 flex-1 text-xs">
-                                    <div className="flex flex-col gap-2">
-                                        <p className="text-xs font-medium">Task title</p>
-                                        <input type="text" className="w-full border border-gray-200 rounded-md p-2" />
-                                    </div>
-                                    <div className="flex flex-col gap-2">
-                                        <p className="text-xs font-medium">Task Description</p>
-                                        <textarea rows={4} className="w-full border border-gray-200 rounded-md p-2" />
-                                    </div>
+                    <div className="flex h-[64.5vh]">
+                        <section className="flex flex-col w-2/3 px-8 pt-5 overflow-y-auto max-h-[64vh] sidebar-scrollbar">
+                            <div className="flex flex-col gap-2 border border-gray-300 rounded-lg p-3 flex-1 text-xs">
+                                <div className="flex flex-col gap-2">
+                                    <p className="text-xs font-medium">Task title</p>
+                                    <input type="text" className="w-full border border-gray-200 rounded-md p-2" />
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                    <p className="text-xs font-medium">Task Description</p>
+                                    <textarea rows={4} className="w-full border border-gray-200 rounded-md p-2" />
                                 </div>
                             </div>
                             {/* Subtasks */}
-                            <Accordion className="mt-5" type="single" collapsible>
+                            <Accordion className="mt-3" type="single" collapsible>
                                 <AccordionItem value="item-1">
                                     <AccordionTrigger className="border-b-2 border-gray-200 rounded-none">Subtasks</AccordionTrigger>
                                     <AccordionContent>
@@ -328,15 +304,15 @@ const CreateNewTask:React.FC<Props> = ({setCreateTaskButton}) => {
                                     </AccordionContent>
                                 </AccordionItem>
                                 <AccordionItem value="item-2">
-                                    <AccordionTrigger>Attachments</AccordionTrigger>
-                                    <AccordionContent>
+                                    <AccordionTrigger className="border-b-2 border-gray-200 rounded-none">Attachments</AccordionTrigger>
+                                    <AccordionContent className="mt-3">
                                         Currently not available.
                                     </AccordionContent>
                                 </AccordionItem>
                                 <AccordionItem value="item-3">
-                                    <AccordionTrigger>Tags</AccordionTrigger>
+                                    <AccordionTrigger className="border-b-2 border-gray-200 rounded-none">Tags</AccordionTrigger>
                                     <AccordionContent>
-                                        <div className="flex flex-wrap gap-3 items-center font-medium text-xs">
+                                        <div className="flex flex-wrap gap-3 items-center font-medium text-xs mt-3">
                                             <Popover>
                                                 <PopoverTrigger 
                                                     className="cursor-pointer bg-gray-100 text-black flex gap-2 items-center px-2 py-1 rounded-lg relative text-xs">
@@ -382,7 +358,7 @@ const CreateNewTask:React.FC<Props> = ({setCreateTaskButton}) => {
                                 </AccordionItem>
                             </Accordion>
                         </section>
-                        <section className="flex flex-col w-1/3 bg-gray-50 py-5">
+                        <section className="flex flex-col w-1/3 bg-gray-50 py-5">   
                             <div className="flex flex-col gap-3 pb-5 border-b-1 border-b-gray-200 px-4 ">
                                 <p>Created by</p>
                                 <div className="flex gap-3 items-center font-semibold">
@@ -393,10 +369,30 @@ const CreateNewTask:React.FC<Props> = ({setCreateTaskButton}) => {
                                 </div>
                             </div>
                             <div className="flex flex-col gap-3 pb-5 border-b-1 border-b-gray-200 px-4 py-5">
-                                <p>Assignee</p>
-                                <div className="flex gap-1 items-center font-semibold">
-                                    <CirclePlus className="cursor-pointer text-inherit" color="gray" strokeWidth={1.5} />
+                                <div className="flex">
+                                    Assignee
+                                    <AssignUserToTask 
+                                        triggerButton={
+                                            <div className="ml-2 flex gap-1 items-center text-blue-500 hover:underline cursor-pointer">
+                                                <Plus size={16} />
+                                                Add user
+                                            </div>
+                                        }
+                                        assignedMembers={assignedMembers}
+                                        setAssignedMembers={setAssignedMembers}
+                                    />
                                 </div>
+                                {
+                                    assignedMembers.length > 0 && (
+                                        <div className="flex pl-3 gap-3 w-full">
+                                            {
+                                                assignedMembers.map((member)=>(
+                                                    <Image key={member.id} src="/images/profile-picture-1.jpg" alt="profile1" width={28} height={28} className="rounded-full h-7 w-7 -mx-2.5" />
+                                                ))
+                                            }
+                                        </div>
+                                    )
+                                }
                             </div>
                             <div className="flex flex-col gap-3 pb-5 border-b-1 border-b-gray-200 px-4 py-5">
                                 <p>Deadline</p>
@@ -423,7 +419,7 @@ const CreateNewTask:React.FC<Props> = ({setCreateTaskButton}) => {
                                     </PopoverContent>
                                 </Popover>
                             </div>
-                            <div className="flex flex-col gap-3 pb-5 border-b-1 border-b-gray-200 px-4 py-5">
+                            <div className="flex flex-col gap-3 pb-5  px-4 py-5">
                                 <p>Set Priority</p>
                                 <Select>
                                     <SelectTrigger className="w-[180px] text-xs border border-gray-200 bg-white hover:bg-gray-100">
@@ -445,6 +441,10 @@ const CreateNewTask:React.FC<Props> = ({setCreateTaskButton}) => {
                             </div>
                             
                         </section>
+                    </div>
+                    <div className="absolute flex w-full bg-white bottom-0 py-3 px-5 border-t border-gray-200 justify-end gap-3">
+                        <button className="cursor-pointer px-5 py-3 border border-gray-200 text-gray-700 rounded-md" onClick={()=> setCreateTaskButton(false)}>Cancel</button>
+                        <button className="cursor-pointer px-5 py-3 bg-[#3B82F6] text-white rounded-md">Confirm</button>
                     </div>
                 </div>
         </div>

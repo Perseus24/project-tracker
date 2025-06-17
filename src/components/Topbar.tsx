@@ -5,6 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { fetchSpecificProject } from "@/lib/supabase/client";
 import { useParams, usePathname } from "next/navigation";
+import React from "react";
 import { useEffect, useState } from "react";
 
 interface Props {
@@ -63,51 +64,32 @@ const Topbar = () => {
                     className="mr-2 data-[orientation=vertical]:h-4"
                 />
                 <Breadcrumb>
-                    {
-                        <BreadcrumbList>
-                            {
-                                linkNames.length > 1 && (
-                                    <>
+                    <BreadcrumbList>
+                        {
+                            linkNames.map((link, index)=>(
+                                <React.Fragment key={`item-${index}`}>
+                                    <BreadcrumbItem >
                                         {
-                                            linkNames.map((link, index)=>(
+                                            index !== linkNames.length - 1 ? (
                                                 <>
-                                                    <BreadcrumbItem key={index}>
-                                                        {
-                                                            index !== linkNames.length - 1 ? (
-                                                                <>
-                                                                    <BreadcrumbLink href={`/${originalLinkNames.slice(0, index + 1).join('/')}`}>
-                                                                        {link}
-                                                                    </BreadcrumbLink>
-                                                                </>
-                                                            ) : (
-                                                                <BreadcrumbPage>{link}</BreadcrumbPage>
-                                                            )
-                                                        }
-                                                    </BreadcrumbItem>
-                                                    {
-                                                        index !== linkNames.length - 1 && (
-                                                            <BreadcrumbSeparator key={`separator-${index}`} className="hidden md:block" />
-                                                        )
-                                                    }
+                                                    <BreadcrumbLink  href={`/${originalLinkNames.slice(0, index + 1).join('/')}`}>
+                                                        {link}
+                                                    </BreadcrumbLink>
                                                 </>
-                                            ))
+                                            ) : (
+                                                <BreadcrumbPage >{link}</BreadcrumbPage>
+                                            )
                                         }
-                                    </>
-                                )
-                            }
-                        </BreadcrumbList>
-                    }
-                    {/* <BreadcrumbList>
-                        <BreadcrumbItem className="hidden md:block">
-                        <BreadcrumbLink href="#">
-                            Building Your Application
-                        </BreadcrumbLink>
-                        </BreadcrumbItem>
-                        <BreadcrumbSeparator className="hidden md:block" />
-                        <BreadcrumbItem>
-                        <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-                        </BreadcrumbItem>
-                    </BreadcrumbList> */}
+                                    </BreadcrumbItem>
+                                    {
+                                        index !== linkNames.length - 1 && (
+                                            <BreadcrumbSeparator key={`separator-${index}`} className="hidden md:block" />
+                                        )
+                                    }
+                                </React.Fragment>
+                            ))
+                        }
+                    </BreadcrumbList>
                 </Breadcrumb>
             </div>
         </header>

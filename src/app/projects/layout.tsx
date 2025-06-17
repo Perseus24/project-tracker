@@ -3,6 +3,10 @@ import Sidebar from "@/components/Sidebar";
 import Topbar from "@/components/Topbar";
 import ProgressBar from "@/components/ui/ProgressBar";
 import { Metadata } from "next";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/AppSidebar"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import { Separator } from "@/components/ui/separator";
 
 export const metadata: Metadata = {
     title: "Projects",
@@ -11,14 +15,16 @@ export const metadata: Metadata = {
 
 export default function ProjectsLayout({children}: {children: React.ReactNode}) {
     return (
-        <div className="flex w-[100%] bg-[#F9FAFB] scrollbar">
+        <SidebarProvider className="flex w-full bg-[#F9FAFB] scrollbar">
             <ProgressBar />
-            <Sidebar />
-            <main className="flex flex-col flex-1 p-4 gap-4">
-                <Topbar title="Projects" />
-                <ProjectNav />
-                {children}
-            </main>
-        </div>
+            <AppSidebar />
+            <SidebarInset>
+                <Topbar />
+                <main className="flex flex-col flex-1 p-4 gap-4">
+                    <ProjectNav />
+                    {children}
+                </main>
+            </SidebarInset>
+        </SidebarProvider>
     );
 }

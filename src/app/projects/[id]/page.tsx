@@ -47,13 +47,15 @@ export default function ProjectDetails () {
                     }>{projectDetails.project_type}</p>
                     <div className="flex items-center gap-5 font-medium">
                         <p>Members: </p>
-                        {
-                            projectDetails.project_members && projectDetails.project_members.map((member: any, index) => (
-                                <div key={index} className="w-7 h-7 rounded-full overflow-hidden border-2 border-white -ml-2">
-                                    <Image src="/images/profile-picture-1.jpg" alt="profile1" width={28} height={28} />
-                                </div>
-                            ))
-                        }
+                        <div className="flex gap-2">
+                            {
+                                projectDetails.project_members && projectDetails.project_members.map((member: any, index) => (
+                                    <div key={index} className="w-7 h-7 rounded-full overflow-hidden border-2 border-white -ml-4">
+                                        <Image src="/images/profile-picture-1.jpg" alt="profile1" width={28} height={28} />
+                                    </div>
+                                ))
+                            }
+                        </div>
                     </div>
                     
                 </div>

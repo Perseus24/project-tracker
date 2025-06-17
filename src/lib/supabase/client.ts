@@ -241,6 +241,7 @@ export const fetchSpecificProject = async (projectId: number, titleOnly: boolean
     return data;
 }
 
+// get user data from the users table
 export const getUser = async () => {
     const { data: { user }, error } = await supabase.auth.getUser()
     if (error) return null

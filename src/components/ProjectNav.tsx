@@ -79,19 +79,7 @@ const ProjectNav = () => {
                     <ChevronRight size="20" color="gray" />
                 </div>
                 <FolderClosed size={18} />
-                <p>Projects</p>
-                <div className="flex">
-                    {
-                        linkNames.length > 0 && (
-                            linkNames.map((link, index)=>(
-                                <p key={index} >
-                                    <span className="text-gray-400 text-[10px] mx-2">/</span>
-                                    {link}
-                                </p>
-                            ))
-                        )
-                    }
-                </div>
+                <p className="font-semibold">{projectTitle}</p>
                 <div className="flex gap-3 ml-auto items-center">
                     <Link href="/projects/create-new-project" className="cursor-pointer bg-[#3B82F6] text-xs text-white rounded-lg py-2 px-3 ml-auto flex items-center gap-2">
                         <DiamondPlus size={16} />

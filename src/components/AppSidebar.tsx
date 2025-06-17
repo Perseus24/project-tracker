@@ -107,7 +107,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarFooter className="bg-blue-900 ">
                 <NavUser user={userData} />
             </SidebarFooter>
-            <SidebarRail />
         </Sidebar>
     )
 }

@@ -2,7 +2,9 @@
 import { parseDate } from "chrono-node"
 import {
     Sheet,
+    SheetClose,
     SheetContent,
+    SheetFooter,
     SheetHeader,
     SheetTitle,
     SheetTrigger,
@@ -21,18 +23,21 @@ import {
     verticalListSortingStrategy,
     arrayMove,
 } from '@dnd-kit/sortable';
-import React, { ChangeEvent, useState } from "react";
+import React, {  useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Calendar } from "./ui/calendar";
 import { Button } from "./ui/button";
-import { CalendarIcon, GripVertical, PencilLine, Plus, Save, StickyNote, Trash2, X } from "lucide-react";
+import { CalendarIcon, Check, GripVertical, PencilLine, Plus, Save, Search, StickyNote, Trash2, X } from "lucide-react";
 import { Input } from "./ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Separator } from "./ui/separator";
 import AssignUserToTask from "./AssignUserToTask";
 import Image from "next/image";
 import { CSS } from '@dnd-kit/utilities';
-
+import clsx from "clsx";
+import { createProjectTask } from "@/lib/supabase/client";
+import { useParams } from "next/navigation";
+import { Toaster, toast } from 'sonner'
 
 interface Props {
     sheetTrigger: React.ReactNode
@@ -106,7 +111,7 @@ function SortableSubtask({ id, onDelete, onRename, onRenameConfirm, isEditing }:
                     }}
                     className="border rounded px-2 py-1 text-xs"
                 />
-                ) : (
+                ) : (   
                 <p>{id}</p>
             )}
             <button className="ml-auto flex items-center gap-3"  >
@@ -135,6 +140,9 @@ function formatDate(date: Date | undefined) {
 }
 
 const CreateNewTaskSheet:React.FC<Props> = ({sheetTrigger}) => {
+    const params = useParams();
+    const projectId = Number(params.id);
+    const [openedSheet, setOpenedSheet] = React.useState(false);
     const [open, setOpen] = React.useState(false)
     const [value, setValue] = React.useState("In 2 days")
     const [date, setDate] = React.useState<Date | undefined>(
@@ -142,7 +150,10 @@ const CreateNewTaskSheet:React.FC<Props> = ({sheetTrigger}) => {
     )
     const [month, setMonth] = React.useState<Date | undefined>(date)
 
-    const [selectedPriority, setSelectedPriority] = useState(0);
+    const [taskTitle, setTaskTitle] = useState('');
+    const [taskDescription, setTaskDescription] = useState('');
+    const [selectedPriority, setSelectedPriority] = useState('');
+
     const [priorities] = useState([
         { id: 0, item: "High" },
         { id: 1, item:  "Medium" },
@@ -159,36 +170,37 @@ const CreateNewTaskSheet:React.FC<Props> = ({sheetTrigger}) => {
     }));
     const [editingSubtaskId, setEditingSubtaskId] = useState<string | null>(null);
 
+    const [searchQueryTags, setSearchQueryTags] = useState('');
     const [taskTags, setTaskTags] = useState<number[]>([]);
     const [tags] = useState([
         // CATEGORY: Roles / Areas
-        { id: 0, item: "Front-End", category: "Area" },
-        { id: 1, item: "Back-End", category: "Area" },
-        { id: 2, item: "Design", category: "Area" },
-        { id: 3, item: "API", category: "Area" },
-        { id: 10, item: "UX/UI", category: "Area" },
-        { id: 11, item: "Database", category: "Area" },
-        { id: 8, item: "DevOps", category: "Area" },
-        { id: 14, item: "Client", category: "Area" },
+        { id: 1, item: "Front-End", category: "Area" },
+        { id: 2, item: "Back-End", category: "Area" },
+        { id: 3, item: "Design", category: "Area" },
+        { id: 4, item: "API", category: "Area" },
+        { id: 5, item: "UX/UI", category: "Area" },
+        { id: 6, item: "Database", category: "Area" },
+        { id: 7, item: "DevOps", category: "Area" },
+        { id: 8, item: "Client", category: "Area" },
 
         // CATEGORY: Task Type
-        { id: 4, item: "Testing", category: "TaskType" },
-        { id: 5, item: "Bug", category: "TaskType" },
-        { id: 6, item: "Feature", category: "TaskType" },
-        { id: 7, item: "Documentation", category: "TaskType" },
-        { id: 9, item: "Research", category: "TaskType" },
-        { id: 15, item: "Review", category: "TaskType" },
-        { id: 18, item: "Maintenance", category: "TaskType" },
+        { id: 9, item: "Testing", category: "TaskType" },
+        { id: 10, item: "Bug", category: "TaskType" },
+        { id: 11, item: "Feature", category: "TaskType" },
+        { id: 12, item: "Documentation", category: "TaskType" },
+        { id: 13, item: "Research", category: "TaskType" },
+        { id: 14, item: "Review", category: "TaskType" },
+        { id: 15, item: "Maintenance", category: "TaskType" },
 
         // CATEGORY: Status / Progress
         { id: 16, item: "Blocked", category: "Status" },
         { id: 17, item: "Priority", category: "Status" },
-        { id: 19, item: "Sprint", category: "Status" },
-        { id: 20, item: "Deployment", category: "Status" },
+        { id: 18, item: "Sprint", category: "Status" },
+        { id: 19, item: "Deployment", category: "Status" },
 
         // CATEGORY: Quality / Performance
-        { id: 12, item: "Security", category: "Quality" },
-        { id: 13, item: "Performance", category: "Quality" }
+        { id: 20, item: "Security", category: "Quality" },
+        { id: 21, item: "Performance", category: "Quality" }
     ]);
 
     const handleRename = (id: string) => {
@@ -211,44 +223,67 @@ const CreateNewTaskSheet:React.FC<Props> = ({sheetTrigger}) => {
         setSubtasks(arrayMove(subtasks, oldIndex, newIndex));
     };
 
-    const addSelectedTags = (e: React.MouseEvent | ChangeEvent, id: number) => {
-        if (e && (e as React.MouseEvent).stopPropagation) {
-            (e as React.MouseEvent).stopPropagation(); // Only call stopPropagation for MouseEvent
-        }
-        setTaskTags((prev) => {
-            if (prev.includes(id)) {
-                return prev.filter(tagId => tagId !== id);
-            } else {
-                return [...prev, id];
-            }
-        });
-    }
-
     const handleAddSubtask = () => {
         setSubtasks(prev => [...prev, newSubtaskInput]);
         setAddNewSubtask(false);
         setNewSubtaskInput('');
     }
+
+    // search query for tags
+    const filteredTagItems = tags.filter(item =>
+        item.item.toLowerCase().includes(searchQueryTags.toLowerCase())
+    );
+
+    const handleSubmit = async() => {
+        setOpenedSheet(false);
+        const taskTable = {
+            "projectId": projectId,
+            "taskTitle": taskTitle,
+            "taskDescription": taskDescription,
+            "taskDeadline": date,
+            "taskPriority": selectedPriority
+        };
+        const { error } = await createProjectTask(taskTable, assignedMembers, subtasks, taskTags);
+        if(error) return { error: error };
+        toast.success('Task has been created')
+
+        resetForm();
+    }
+
+    // Function to reset the form state
+    const resetForm = () => {
+        setTaskTitle('');
+        setTaskDescription('');
+        setValue('In 2 days');
+        setSelectedPriority('');
+        setAssignedMembers([]);
+        setSubtasks([]);
+        setTaskTags([]);
+    };
+
+    // Handle Sheet Close
+    const handleCloseSheet = () => {
+        resetForm(); // Reset form when the sheet is closed
+        setOpenedSheet(false); // Close the sheet
+    };
+
     return (
-        <Sheet>
+        <Sheet open={openedSheet} onOpenChange={setOpenedSheet}>
             <SheetTrigger>{sheetTrigger}</SheetTrigger>
+            <Toaster richColors position="top-right"  />
             <SheetContent>
-                <SheetHeader className="border-b border-gray-300">
+                <SheetHeader className="border-b border-gray-300 ">
                     <SheetTitle>Create New Task</SheetTitle>
-                    {/* <SheetDescription>
-                        Make changes to your profile here. Click save when you're
-                        done.
-                    </SheetDescription> */}
                 </SheetHeader>
-                <div className="flex flex-col gap-4 text-[13px] text-gray-700 overflow-auto mb-4">
+                <div className="flex flex-col gap-4 text-[13px] text-gray-700 overflow-auto pb-4 ">
                     <div className="px-4 flex flex-col gap-4 ">
                         <div className="grid gap-3">
                             <label className="font-medium">Task Title</label>
-                            <input type="text" className="rounded-md border border-gray-200 h-8 p-2 text-gray-800" />
+                            <input value={taskTitle} onChange={(e) => setTaskTitle(e.target.value)} type="text" className="rounded-md border border-gray-200 h-8 p-2 text-gray-800" />
                         </div>
                         <div className="grid gap-3">
                             <label className="font-medium">Task Description</label>
-                            <textarea rows={4} className="rounded-md border border-gray-200 p-2 text-gray-800" />
+                            <textarea value={taskDescription} onChange={(e) => setTaskDescription(e.target.value)} rows={4} className="rounded-md border border-gray-200 p-2 text-gray-800" />
                         </div>
                         <div className="grid gap-3">
                             <label className="font-medium">Deadline</label>
@@ -303,7 +338,7 @@ const CreateNewTaskSheet:React.FC<Props> = ({sheetTrigger}) => {
                         </div>
                         <div className="grid gap-3">
                             <label className="font-medium">Priority</label>
-                            <Select>
+                            <Select value={selectedPriority} onValueChange={setSelectedPriority}>
                                 <SelectTrigger className="w-full border border-gray-200 bg-white hover:bg-gray-100">
                                     <SelectValue placeholder="Select a priority" />
                                 </SelectTrigger>
@@ -313,7 +348,6 @@ const CreateNewTaskSheet:React.FC<Props> = ({sheetTrigger}) => {
                                             <SelectItem 
                                                 key={index} 
                                                 value={priority.item} 
-                                                onClick={() => setSelectedPriority(priority.id)}
                                                 >{priority.item}</SelectItem>
                                         ))
                                     }
@@ -394,8 +428,81 @@ const CreateNewTaskSheet:React.FC<Props> = ({sheetTrigger}) => {
                                 Add Subtask
                             </div>
                         </div>
+                        <div className="grid gap-3">
+                            <label className="font-medium">Tags</label>
+                            <div className="flex flex-wrap gap-3 items-center font-medium text-xs mt-3">
+                                <Popover modal={true}>
+                                    <PopoverTrigger 
+                                        className="cursor-pointer bg-gray-100 text-black flex gap-2 items-center px-2 py-1 rounded-lg relative text-xs">
+                                        <Plus size={16} />
+                                        Add tag
+                                    </PopoverTrigger>
+                                    <PopoverContent align="end" side="left" className="text-xs w-96 p-0 gap-0 h-96 overflow-hidden">
+                                        <div className="p-4.5 border-b border-gray-300 ">
+                                            <p className="text-base font-medium">Add Tags</p>
+                                            <p className="text-[13px]">
+                                                Add tags to help you keep track of your tasks.
+                                            </p>
+                                        </div>
+                                        <div className="px-4.5 flex py-2.5 border-b border-gray-300">
+                                            <Search size={18} color="gray" />
+                                            <input autoFocus 
+                                                className="ml-2.5 focus:outline-none text-[13px]" 
+                                                placeholder="Search for users..." 
+                                                onChange={(e) => setSearchQueryTags(e.target.value)}/>
+                                        </div>
+                                        <div className="flex flex-col px-2 py-1 gap-0.5 h-[70%] overflow-y-scroll">
+                                            {
+                                                filteredTagItems.length > 0 ? (
+                                                    filteredTagItems.map((tag) => (
+                                                        <div 
+                                                            key={tag.id} 
+                                                            className={clsx(    
+                                                                "px-1.5 py-1 flex gap-4 items-center hover:bg-gray-100 rounded-md cursor-pointer",
+                                                                taskTags.includes(tag.id) && "opacity-50"
+                                                            )}
+                                                            onClick={() => {
+                                                                if(taskTags.includes(tag.id)) {
+                                                                    setTaskTags(taskTags.filter((id) => id !== tag.id));
+                                                                } else {
+                                                                    setTaskTags([...taskTags, tag.id]);
+                                                                }
+                                                            }}
+                                                            >
+                                                            <p className="text-sm">{tag.item}</p>
+                                                            {
+                                                                taskTags.includes(tag.id) && (
+                                                                    <Check size={18} color="gray" strokeWidth={2} className="ml-auto" />
+                                                                )
+                                                            }
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <p className="w-full flex justify-center py-5 text-[13px]">No users found.</p>
+                                                )
+                                            }
+                                        </div>
+                                    </PopoverContent>
+                                </Popover>
+                                {
+                                    taskTags.map((tag, index) => (
+                                        <div className="bg-blue-500 text-white px-3 py-1 rounded-lg text-xs flex items-center gap-2" key={index}>
+                                            {tags.find(t => t.id === tag)?.item}
+                                            <X size={16} className="cursor-pointer"
+                                                onClick={() => setTaskTags(taskTags.filter((_, i) => i !== index))} />
+                                        </div>
+                                    ))
+                                }
+                            </div>
+                        </div>
                     </div>
                 </div>
+                <SheetFooter className="">
+                    <Button onClick={() => {handleSubmit()}} className="cursor-pointer">Create</Button>
+                    <SheetClose asChild>
+                        <Button variant="outline" onClick={handleCloseSheet}>Close</Button>
+                    </SheetClose>
+                </SheetFooter>
             </SheetContent>
         </Sheet>
     )

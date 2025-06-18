@@ -19,7 +19,6 @@ const Topbar = () => {
 
     let linkNames = pathname.split('/').slice(1);
     let originalLinkNames = pathname.split('/').slice(1);
-    console.log("original linkNames", originalLinkNames);
 
     if (linkNames.length > 0) {
         linkNames.forEach((link, index, arr) => {

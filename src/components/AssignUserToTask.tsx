@@ -64,7 +64,7 @@ const AssignUserToTask:React.FC<Props> = ({triggerButton, assignedMembers, setAs
                 <div className="p-4.5 border-b border-gray-300 ">
                     <p className="text-base font-medium">Assign User</p>
                     <p className="text-[13px]">
-                        Assign users from your team to this task. Click save when you&apos;re done.
+                        Assign users from your team to this task.
                     </p>
                 </div>
                 <div className="px-4.5 flex py-2.5 border-b border-gray-300">
@@ -73,7 +73,7 @@ const AssignUserToTask:React.FC<Props> = ({triggerButton, assignedMembers, setAs
                         className="ml-2.5 focus:outline-none text-[13px]" 
                         placeholder="Search for users..." 
                         onChange={handleSearchChange}/>
-                    </div>
+                </div>
                 <div className="flex flex-col px-2 py-1 gap-0.5">
                     {
                         filteredItems.length > 0 ? (
@@ -99,7 +99,7 @@ const AssignUserToTask:React.FC<Props> = ({triggerButton, assignedMembers, setAs
                                     </div>
                                     {
                                         assignedMembers.includes(member.id) && (
-                                            <Check key={member.id} size={18} color="gray" strokeWidth={2} className="ml-auto" />
+                                            <Check size={18} color="gray" strokeWidth={2} className="ml-auto" />
                                         )
                                     }
                                 </div>

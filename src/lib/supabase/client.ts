@@ -1,6 +1,6 @@
 
 import { createBrowserClient } from '@supabase/ssr';
-import { Users } from '../interface';
+import { TaskTable } from '../interface';
 
 const supabaseUrl = 'https://msvpnuyubljgawdzsfoq.supabase.co'!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -252,4 +252,61 @@ export const getUser = async () => {
         .single();
     if (userDataError) return null
     return userData
+}
+
+export const createProjectTask = async (taskTable: TaskTable, assignedMembers: any[], subtasks: any[], taskTags: number[]) => {
+    const userId = (await getUser())?.id
+    const {data: taskData, error: taskError} = await supabase
+        .from('project_tasks')
+        .insert([{
+            project_id: taskTable.projectId,
+            task_title: taskTable.taskTitle,
+            task_description: taskTable.taskDescription,
+            task_deadline: taskTable.taskDeadline,
+            task_priority: taskTable.taskPriority,
+            created_by: userId
+        }])
+        .select();
+    if (taskError) {
+        return { error: taskError.message };
+    }
+    
+    assignedMembers.forEach( async(member) => {
+        const { error: membersError} = await supabase
+            .from('project_task_members')
+            .insert([{
+                project_task_id: taskData[0].id,
+                user_id: member
+        }]);
+        if (membersError) {
+            return { error: membersError.message };
+        }
+    })
+
+    subtasks.forEach( async(subtask) => {
+        const { error: subtaskTableError} = await supabase
+            .from('project_subtasks')
+            .insert([{
+                project_task_id: taskData[0].id,
+                subtask_text: subtask
+        }]);
+        if (subtaskTableError) {
+            return { error: subtaskTableError.message };
+        }
+    })
+
+    taskTags.forEach( async(tag) => {
+        const { error: tagError} = await supabase
+            .from('project_task_tags')
+            .insert([{
+                project_tasks_id: taskData[0].id,
+                tag_id: tag
+        }]);
+        if (tagError) {
+            return { error: tagError.message };
+        }
+    })
+
+    return {error: null};
+    
 }

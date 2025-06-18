@@ -9,7 +9,6 @@ import {  useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton"
 
 export default function Projects() {
-    
     const [projectList, setProjectList] = useState<any[]>([]);
     const [selectedMembers, setSelectedMembers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);

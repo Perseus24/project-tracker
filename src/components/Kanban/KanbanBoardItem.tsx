@@ -1,5 +1,5 @@
 'use client';
-import { Loader, MessageCircleMore } from 'lucide-react';
+import { Ellipsis, Loader, MessageCircleMore } from 'lucide-react';
 import { clsx } from 'clsx';
 
 interface Props {
@@ -28,18 +28,21 @@ const KanbanBoardItem: React.FC<Props> = ({kanbanType, kanbanTotalItems}) => {
     }
 
     return (
-        <div className='bg-slate-100 rounded-lg text-black py-3  flex flex-col gap-4 h-[500px] '>
-            <div className='flex items-center justify-between px-2'>
-                <div className='flex gap-2 items-center'>
+        <div className='bg-slate-100 rounded-lg text-black p-3  flex flex-col gap-4 h-[500px] '>
+            <div className='bg-white rounded-lg px-2 py-1.5 items-center justify-between flex'>
+                <div className='flex gap-2 items-center bg-gray-50 py-1 px-1.5 rounded-lg'>
                     <div className={clsx(
-                        'h-4 w-1 rounded-3xl',
+                        'h-4 w-2 rounded-sm',
                         kanbanColor
                     )}></div>
-                    <p className='font-medium'>{kanbanType}</p>
-                    <div className='text-gray-700 px-1.5 py-0.5 rounded bg-gray-200 text-sm shadow-2xl'>{kanbanTotalItems}</div>
+                    <p className='font-medium uppercase text-sm'>{kanbanType}</p>
+                </div>
+                <div className='flex items-center gap-3'>
+                    <div className='text-gray-700 px-1.5 py-0.5 rounded bg-gray-200 text-xs shadow-2xl'>{kanbanTotalItems ? kanbanTotalItems : '0'}</div>
+                    <Ellipsis className='text-inherit' size={16} />
                 </div>
             </div>
-            <div className='flex flex-col gap-4 px-2 overflow-y-scroll sidebar-scrollbar'>
+            <div className='flex flex-col gap-4 pr-2 overflow-auto sidebar-scrollbar'>
                 {
                     Array.from({ length: kanbanTotalItems}).map((_, index) => (
                         <div key={index} className='bg-white rounded-lg flex flex-col p-2'>

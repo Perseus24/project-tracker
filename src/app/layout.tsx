@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
+import { ProjectProvider } from "@/context/ProjectContext";
 
 // const geistSans = Geist({
 //   variable: "--font-geist-sans",
@@ -29,11 +30,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${poppins.className} antialiased`}
-      >
-        {children}
+      <ProjectProvider>
+        <body className={`${poppins.className} antialiased`}>
+          {children}
         </body>
+      </ProjectProvider>
     </html>
   );
 }

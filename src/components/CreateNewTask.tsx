@@ -43,6 +43,7 @@ import { Calendar } from "./ui/calendar";
 import React from "react";
 import AssignUserToTask from "./AssignUserToTask";
 
+
 function isInteractiveElement(element: EventTarget | null) {
     if (!(element instanceof HTMLElement)) return false;
     const interactiveElements = ['button', 'input', 'textarea', 'select', 'option'];

@@ -25,3 +25,12 @@ export interface Project {
     project_members: ProjectMember[];
     project_status: string;
 }
+
+// for creating a new task
+export interface TaskTable {
+    projectId: number;  // Assuming projectId is a string or number
+    taskTitle: string;
+    taskDescription: string;
+    taskDeadline: Date | undefined;  
+    taskPriority: string;  // Assuming taskPriority is a string
+}

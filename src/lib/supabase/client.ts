@@ -1,6 +1,7 @@
 
 import { createBrowserClient } from '@supabase/ssr';
 import { TaskTable } from '../interface';
+import { formatDate, getDifferenceDate } from '../utils';
 
 const supabaseUrl = 'https://msvpnuyubljgawdzsfoq.supabase.co'!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -334,4 +335,70 @@ export const fetchAllTasks = async (projectId: number) => {
         return acc;
     }, {} as Record<string, typeof taskData>);
     return { tasks: groupedByStatus, error: null };
+}
+
+// function to get all the tasks from all the projects the user is involved in
+export const fetchAllTasksFromAllProjects = async () => {
+    const userId = (await getUser())?.id
+    const {data: taskData, error: taskError} = await supabase
+        .from('projects')
+        .select(`
+            *,
+            project_members(users(id))
+            ` )
+        .order('created_at', { ascending: false });
+
+    // get only the projects the user is involved in
+    const filteredProjects = taskData?.filter(project => {
+        return project.project_members.some((member: any) => member.users.id === userId);
+    });
+
+    if (!filteredProjects) return {projects: null}
+    const projectsWithTasks = await Promise.all(
+        filteredProjects.map(async (project: any) => {
+            // Get all the tasks for this project
+            const { data: projectTasksData, error: taskError } = await supabase
+                .from('project_tasks')
+                .select(`
+                    *,
+                    project_task_tags(task_tags_list(tag_text, tag_category)),
+                    project_subtasks(subtask_text, subtask_status)
+                `)
+                .eq('project_id', project.id)
+                .order('created_at', { ascending: false });
+
+            if (taskError) {
+                // Handle error (optional)
+                return { ...project, tasks: [] }; // Or handle as needed
+            }
+
+            // Group tasks by status
+            const groupedByStatus = projectTasksData.reduce((acc, task) => {
+                const key = task.task_status || 'Unknown'; // Default to 'Unknown' if no task_status
+                acc[key] = acc[key] || [];
+                acc[key].push({
+                    ...task,
+                    updated_at: getDifferenceDate(formatDate(task.updated_at), new Date()),
+                    progress: calculateTaskProgress(task.project_subtasks)
+                });
+                return acc;
+            }, {} as Record<string, typeof projectTasksData>);
+
+            // Add grouped tasks to the project object
+            return {
+                ...project,
+                groupedTasksByStatus: groupedByStatus
+            };
+        })
+    );
+
+    return { projects: projectsWithTasks };
+}
+
+const calculateTaskProgress = (subtasks: any[]) => {
+    if (subtasks.length > 0) {
+        const completedSubtasks = subtasks.filter((subtask) => subtask.subtask_status === 'Completed');
+        return (completedSubtasks.length / subtasks.length) * 100;
+    }
+    return 0;
 }

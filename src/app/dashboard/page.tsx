@@ -1,7 +1,9 @@
 'use client';
 import KanbanBoardItem from '@/components/Kanban/KanbanBoardItem';
+import { fetchAllTasksFromAllProjects } from '@/lib/supabase/client';
 import { Ellipsis } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import { useEffect, useState } from 'react';
 
 // Disable SSR for the chart
 const EChartPieComponent = dynamic(() => import('@/components/Echarts/EchartPieChart'), {
@@ -12,6 +14,28 @@ const EChartBarComponent = dynamic(() => import('@/components/Echarts/EchartBarC
 });
 
 const Dashboard = () => {
+    const [taskList, setTaskList] = useState<any[] | null>(null);
+    const [toDoTaskList, setToDoTaskList] = useState<any[] | null>(null);
+    const [inReviewTasks, setInReviewTasks] = useState<any[] | null>(null);
+    const [inProgressTasks, setInProgressTasks] = useState<any[] | null>(null);
+    const [completedTasks, setCompletedTasks] = useState<any[] | null>(null);
+
+    useEffect(() => {
+        const fetchAllTasks = async () => {
+            const { projects } = await fetchAllTasksFromAllProjects();
+            if (!projects) return;
+            
+            projects.map((proj: any) => {
+                if (!proj.groupedTasksByStatus) return;
+                if (proj.groupedTasksByStatus["To Do"]) setToDoTaskList([...(toDoTaskList || []), ...proj.groupedTasksByStatus["To Do"]]);
+                if (proj.groupedTasksByStatus["In Review"]) setInReviewTasks([...(inReviewTasks || []), ...proj.groupedTasksByStatus["In Review"]]);
+                if (proj.groupedTasksByStatus["In Progress"]) setInProgressTasks([...(inProgressTasks || []), ...proj.groupedTasksByStatus["In Progress"]]);
+                if (proj.groupedTasksByStatus["Completed"]) setCompletedTasks([...(completedTasks || []), ...proj.groupedTasksByStatus["Completed"]]);
+            })
+        }
+        fetchAllTasks();
+    }, [])
+
     return (
         <div className='flex flex-1 flex-col gap-5 p-4 pt-0 overflow-hidden'>
             <div className='grid grid-cols-7 gap-4 h-[40vh]'>
@@ -31,10 +55,10 @@ const Dashboard = () => {
                 </div>
             </div>
             <section className="grid grid-cols-4 gap-x-4">
-                <KanbanBoardItem kanbanType='To-Do' kanbanTotalItems={10} />
-                <KanbanBoardItem kanbanType='In-Progress' kanbanTotalItems={3} />
-                <KanbanBoardItem kanbanType='In-Review' kanbanTotalItems={0} />
-                <KanbanBoardItem kanbanType='Completed' kanbanTotalItems={1} />
+                <KanbanBoardItem kanbanType='To-Do' items={toDoTaskList} />
+                <KanbanBoardItem kanbanType='In-Progress' items={inProgressTasks} />
+                <KanbanBoardItem kanbanType='In-Review' items={inReviewTasks} />
+                <KanbanBoardItem kanbanType='Completed' items={completedTasks} />
             </section>
         </div>
     );

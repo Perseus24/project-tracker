@@ -5,7 +5,7 @@ import { Task } from "@/lib/interface";
 
 interface Props {
     kanbanType: string,
-    items: Task[],
+    items: Task[] | null,
 }
 
 const KanbanBoardItem: React.FC<Props> = ({kanbanType, items}) => {

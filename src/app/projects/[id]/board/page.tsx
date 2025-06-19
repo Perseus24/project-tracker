@@ -9,7 +9,6 @@ import { useParams } from "next/navigation";
 import {  useEffect, useState } from "react";
 import { Task } from "@/lib/interface";
 import { formatDate, getDifferenceDate } from "@/lib/utils";
-import { format, formatDistance, formatRelative, subDays } from 'date-fns'
 
 export default function Board () {
     const params = useParams();
@@ -46,6 +45,7 @@ export default function Board () {
 
         fetchTaskList();
     }, [])
+    
     const calculateTaskProgress = (subtasks: any[]) => {
         if (subtasks.length > 0) {
             const completedSubtasks = subtasks.filter((subtask) => subtask.subtask_status === 'Completed');

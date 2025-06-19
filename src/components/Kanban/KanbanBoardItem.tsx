@@ -58,7 +58,7 @@ const KanbanBoardItem: React.FC<Props> = ({kanbanType, items}) => {
                             <div className='mb-2 flex justify-between items-start'>
                                 <div className='flex flex-wrap gap-2'>
                                     <div className={clsx(
-                                        'text-[10px] bg-red-100 px-1.5 py-0.5 rounded ',
+                                        'text-[10px] px-1.5 py-0.5 rounded ',
                                         item.task_priority === 'High' && 'bg-red-100 text-red-500',
                                         item.task_priority === 'Medium' && 'bg-yellow-100 text-yellow-500',
                                         item.task_priority === 'Low' && 'bg-green-100 text-green-500',

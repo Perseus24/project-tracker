@@ -6,6 +6,7 @@ import { Button } from "./ui/button";
 import { useProject } from "@/context/ProjectContext";
 import clsx from "clsx";
 import { act, useEffect } from "react";
+import CreateNewTaskSheet from "./CreateNewTaskSheet";
 
 const ProjectBoardTabs = () => {
     const { activeBoardTab, setActiveBoardTab } = useProject();
@@ -50,10 +51,13 @@ const ProjectBoardTabs = () => {
                     ))
                 }
                 <div className="w-0.5 bg-gray-200 mx-4"></div>
-                <div className="text-xs flex items-center gap-1 px-2 py-1 hover:bg-gray-50 cursor-pointer rounded-md">
-                    <Plus size={16} className="text-inherit" />
-                    <p>New Task</p>
-                </div>
+                <CreateNewTaskSheet sheetTrigger={
+                    <div className="text-xs flex items-center gap-1 px-2 py-1 hover:bg-gray-50 cursor-pointer rounded-md">
+                        <Plus size={16} className="text-inherit" />
+                        <p>New Task</p>
+                    </div>
+                }
+                />
             </div>
         </div>
     )

@@ -74,7 +74,6 @@ const KanbanBoardItem: React.FC<Props> = ({kanbanType, items}) => {
                                             )}>{tag.task_tags_list.tag_text}</div>
                                         ))
                                     }
-                                    {/* <div className='text-[10px] bg-blue-100 px-1.5 py-0.5 rounded text-blue-500'>Back-End</div> */}
                                 </div>
                                 <p className='text-xs text-gray-400 min-w-max'>{`TDT-${index}`}</p>
                             </div>
@@ -92,8 +91,9 @@ const KanbanBoardItem: React.FC<Props> = ({kanbanType, items}) => {
                                 <div className='bg-gray-200 h-1.5 rounded-full'>
                                     <div className={clsx(
                                         'bg-[#3B82F6] h-1.5 rounded-full',
-                                        `w-${item.progress}`
-                                    )}></div>
+                                    )}
+                                    style={{ width: `${item.progress}%` }}
+                                    ></div>
                                 </div>
                             </div>
                             <div className="flex justify-between items-center text-gray-500 text-[10px]">

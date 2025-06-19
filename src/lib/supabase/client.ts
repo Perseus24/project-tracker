@@ -316,11 +316,13 @@ export const createProjectTask = async (taskTable: TaskTable, assignedMembers: a
 export const fetchAllTasks = async (projectId: number) => {
     const {data: taskData, error: taskError} = await supabase
         .from('project_tasks')
-        .select(`*`)
+        .select(`
+            *,
+            project_task_tags(task_tags_list(tag_text, tag_category)),
+            project_subtasks(subtask_text, subtask_status)
+            ` )
         .eq('project_id', projectId)
         .order('created_at', { ascending: false });
-
-    console.log("from client: ", taskData);
 
     if (taskError) {
         return { tasks:null, error: taskError.message };

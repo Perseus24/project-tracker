@@ -1,13 +1,14 @@
 'use client';
 import { Ellipsis, Loader, MessageCircleMore } from 'lucide-react';
 import { clsx } from 'clsx';
+import { Task } from "@/lib/interface";
 
 interface Props {
     kanbanType: string,
-    kanbanTotalItems: number
+    items: Task[],
 }
 
-const KanbanBoardItem: React.FC<Props> = ({kanbanType, kanbanTotalItems}) => {
+const KanbanBoardItem: React.FC<Props> = ({kanbanType, items}) => {
     let kanbanColor = '';
     switch (kanbanType) {
         case 'To-Do':
@@ -26,6 +27,10 @@ const KanbanBoardItem: React.FC<Props> = ({kanbanType, kanbanTotalItems}) => {
             kanbanColor = 'bg-red-500';
             break;
     }
+    
+    if (items) {
+        console.log("TAGS: ", items[0].project_task_tags[0].task_tags_list);
+    }
 
     return (
         <div className='bg-slate-100 rounded-lg text-black p-3  flex flex-col gap-4 h-[500px] '>
@@ -38,24 +43,43 @@ const KanbanBoardItem: React.FC<Props> = ({kanbanType, kanbanTotalItems}) => {
                     <p className='font-medium uppercase text-sm'>{kanbanType}</p>
                 </div>
                 <div className='flex items-center gap-3'>
-                    <div className='text-gray-700 px-1.5 py-0.5 rounded bg-gray-200 text-xs shadow-2xl'>{kanbanTotalItems ? kanbanTotalItems : '0'}</div>
+                    <div className='text-gray-700 px-1.5 py-0.5 rounded bg-gray-200 text-xs shadow-2xl'>{
+                        items ? items.length : 0
+                    }
+                    </div>
                     <Ellipsis className='text-inherit' size={16} />
                 </div>
             </div>
             <div className='flex flex-col gap-4 pr-2 overflow-auto sidebar-scrollbar'>
                 {
-                    Array.from({ length: kanbanTotalItems}).map((_, index) => (
+                    items && items.map((item, index) => (
                         <div key={index} className='bg-white rounded-lg flex flex-col p-2'>
                             {/* Task Category */}
-                            <div className='mb-2 flex justify-between items-center'>
-                                <div className='flex gap-2'>
-                                    <div className='text-[10px] bg-red-100 px-1.5 py-0.5 rounded text-red-500'>High</div>
-                                    <div className='text-[10px] bg-blue-100 px-1.5 py-0.5 rounded text-blue-500'>Back-End</div>
+                            <div className='mb-2 flex justify-between items-start'>
+                                <div className='flex flex-wrap gap-2'>
+                                    <div className={clsx(
+                                        'text-[10px] bg-red-100 px-1.5 py-0.5 rounded ',
+                                        item.task_priority === 'High' && 'bg-red-100 text-red-500',
+                                        item.task_priority === 'Medium' && 'bg-yellow-100 text-yellow-500',
+                                        item.task_priority === 'Low' && 'bg-green-100 text-green-500',
+                                    )}>{item.task_priority}</div>
+                                    {
+                                        item.project_task_tags.map((tag, index) => (
+                                            <div key={index} className={clsx(
+                                                'text-[10px] px-1.5 py-0.5 rounded',
+                                                tag.task_tags_list.tag_category === 'Area' && 'bg-blue-100 text-blue-500',
+                                                tag.task_tags_list.tag_category === 'Task Type' && 'bg-purple-100 text-purple-500',
+                                                tag.task_tags_list.tag_category === 'Status' && 'bg-red-100 text-red-500',
+                                                tag.task_tags_list.tag_category === 'Quality' && 'bg-green-100 text-green-500',
+                                            )}>{tag.task_tags_list.tag_text}</div>
+                                        ))
+                                    }
+                                    {/* <div className='text-[10px] bg-blue-100 px-1.5 py-0.5 rounded text-blue-500'>Back-End</div> */}
                                 </div>
-                                <p className='text-xs text-gray-400'>D-149</p>
+                                <p className='text-xs text-gray-400 min-w-max'>{`TDT-${index}`}</p>
                             </div>
-                            <p className='text-sm font-medium mb-1'>Develop API Endpoints</p>
-                            <p className='text-xs font-light text-gray-500'>Build the necessary API endpoints</p>
+                            <p className='text-sm font-medium mb-1'>{item.task_title}</p>
+                            <p className='text-xs font-light text-gray-500'>{item.task_description}</p>
                             {/* Progress Bar */}
                             <div className='flex flex-col gap-1 my-4'>
                                 <div className='flex justify-between items-center text-[10px] text-gray-400'>
@@ -63,14 +87,17 @@ const KanbanBoardItem: React.FC<Props> = ({kanbanType, kanbanTotalItems}) => {
                                         <Loader size={13} />
                                         <p>Progress</p>
                                     </div>
-                                    <p>50%</p>
+                                    <p>{item.progress}%</p>
                                 </div>
                                 <div className='bg-gray-200 h-1.5 rounded-full'>
-                                    <div className='bg-[#3B82F6] h-1.5 rounded-full w-1/2'></div>
+                                    <div className={clsx(
+                                        'bg-[#3B82F6] h-1.5 rounded-full',
+                                        `w-${item.progress}`
+                                    )}></div>
                                 </div>
                             </div>
                             <div className="flex justify-between items-center text-gray-500 text-[10px]">
-                                <p>Updated 3 hours ago</p>
+                                <p>{item.updated_at}</p>
                                 <div className='flex gap-1 items-center'>
                                     <MessageCircleMore size={16} />
                                     <p>2</p>

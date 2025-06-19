@@ -1,5 +1,6 @@
 'use client';
 
+import { useProject } from "@/context/ProjectContext";
 import { Project } from "@/lib/interface";
 import { fetchSpecificProject } from "@/lib/supabase/client";
 import clsx from "clsx";
@@ -9,11 +10,21 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function ProjectDetails () {
+    const { projectId, setProjectId } = useProject();
     const params = useParams();
-    const projectId = Number(params.id);
+    const currProjectId = Number(params.id);
     const [projectDetails, setProjectDetails] = useState<Project | null>(null);
+
+    // Set the projectId if it's different from the current one
+    useEffect(() => {
+        if (currProjectId && currProjectId !== projectId) {
+        setProjectId(currProjectId);  
+        }
+    }, [currProjectId, projectId, setProjectId]);
+
     useEffect(() => {
         const fetchProjectDetails = async () => {
+            if(projectId === null) return;
             const data = await fetchSpecificProject(projectId, false);
             if (!data) return;
             setProjectDetails(data);

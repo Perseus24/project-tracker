@@ -5,14 +5,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from 'next/navigation';
+import clsx from "clsx";
+import ProjectBoardTabs from "./ProjectBoardTabs";
 
 const ProjectNav = () => {
     const pathname = usePathname();
     const params = useParams();
     const projectId = Number(params.id);
+    
     const [projectTotal, setProjectTotal] = useState(0);
     const [projectTitle, setProjectTitle] = useState('');
-    
     const bottomNavigationLinks = useMemo(() => {
         if (!projectId) return [];
         return [
@@ -22,7 +24,7 @@ const ProjectNav = () => {
             { id: 3, item: "Files", active: false, href: `/projects/${projectId}/files` },
             { id: 4, item: "Timeline", active: false, href: `/projects/${projectId}/timeline` },
         ];
-        }, [projectId]);
+    }, [projectId]);
 
     let linkNames = pathname.split('/').slice(2);
     if (linkNames.length > 0) {
@@ -43,8 +45,7 @@ const ProjectNav = () => {
             }
         })
     }
-
-
+    
     useEffect(() => {
         const fetchTitle = async () => {
             setProjectTitle('');
@@ -68,7 +69,9 @@ const ProjectNav = () => {
             }
         }
         
-        getProjects();
+        if(projectId === null) {
+            getProjects();
+        }
     }, [])
 
     return (
@@ -89,13 +92,24 @@ const ProjectNav = () => {
             </div>
             {
                 projectId ? (
-                    <div className="flex items-center gap-2 border-t-2 border-t-gray-200 text-xs text-gray-500 font-medium py-3 pl-5">
+                    <div className={clsx(
+                        "flex items-center gap-2 border-t-2 border-t-gray-200 text-xs text-gray-500 font-medium py-3 pl-5",
+                        bottomNavigationLinks[1].active ? 'justify-between pr-5' : ''
+                        )}>
+                        <div className="flex">
+                            {
+                                bottomNavigationLinks.map((link) => (
+                                    <Link key={link.id} href={link.href} className={`flex gap-1 ${link.active ? 'text-[#3B82F6] font-semibold' : ''} px-2 py-1 hover:bg-gray-100 rounded-md`}>
+                                        <p>{link.item}</p>
+                                    </Link>
+                                ))
+                            }
+                        </div>
+                        {/* Custom component for the Board tab */}
                         {
-                            bottomNavigationLinks.map((link) => (
-                                <Link key={link.id} href={link.href} className={`flex gap-1 ${link.active ? 'text-[#3B82F6] font-semibold' : ''} px-2 py-1 hover:bg-gray-100 rounded-md`}>
-                                    <p>{link.item}</p>
-                                </Link>
-                            ))
+                            bottomNavigationLinks[1].active && (
+                                <ProjectBoardTabs />
+                            )
                         }
                     </div>
                 ) : (

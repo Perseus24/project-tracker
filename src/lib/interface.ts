@@ -34,3 +34,33 @@ export interface TaskTable {
     taskDeadline: Date | undefined;  
     taskPriority: string;  // Assuming taskPriority is a string
 }
+
+// TASKS
+
+interface TaskTag {
+    task_tags_list: {
+        tag_text: string;
+        tag_category: string;
+    };
+}
+
+interface ProjectSubtasks {
+    subtask_text: string;
+    subtask_status: string;
+}
+
+export interface Task {
+    id: string; // UUID string
+    created_at: string; // ISO date string
+    project_id: number; // assuming project_id is a number
+    task_title: string;
+    task_description: string;
+    task_deadline: string; // ISO date string
+    task_priority: string;
+    created_by: string; // UUID string
+    updated_at: string; // ISO date string
+    task_status: string;
+    project_task_tags: TaskTag[];
+    project_subtasks: ProjectSubtasks[];
+    progress?: number;
+}

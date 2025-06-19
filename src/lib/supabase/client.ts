@@ -254,6 +254,7 @@ export const getUser = async () => {
     return userData
 }
 
+// function to create a new task
 export const createProjectTask = async (taskTable: TaskTable, assignedMembers: any[], subtasks: any[], taskTags: number[]) => {
     const userId = (await getUser())?.id
     const {data: taskData, error: taskError} = await supabase
@@ -309,4 +310,28 @@ export const createProjectTask = async (taskTable: TaskTable, assignedMembers: a
 
     return {error: null};
     
+}
+
+// function to get all the tasks related to the project
+export const fetchAllTasks = async (projectId: number) => {
+    const {data: taskData, error: taskError} = await supabase
+        .from('project_tasks')
+        .select(`
+            *,
+            project_task_tags(task_tags_list(tag_text, tag_category)),
+            project_subtasks(subtask_text, subtask_status)
+            ` )
+        .eq('project_id', projectId)
+        .order('created_at', { ascending: false });
+
+    if (taskError) {
+        return { tasks:null, error: taskError.message };
+    }
+    const groupedByStatus = taskData.reduce((acc, task) => {
+        const key = task.task_status || 'Unknown';
+        acc[key] = acc[key] || [];
+        acc[key].push(task);
+        return acc;
+    }, {} as Record<string, typeof taskData>);
+    return { tasks: groupedByStatus, error: null };
 }
